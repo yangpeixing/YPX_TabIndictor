@@ -1,2 +1,2 @@
-# YPX_BezierQQRefreshDemo
-安卓开发高仿苹果版QQ下拉刷新
+# YPX_TabIndictorMarster
+安卓开发高仿网易指示器
