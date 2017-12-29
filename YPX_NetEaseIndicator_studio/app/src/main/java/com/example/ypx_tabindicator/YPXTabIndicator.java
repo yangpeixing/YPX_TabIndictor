@@ -1,152 +1,162 @@
-
-package com.example.ypx_neteaseindicator;
+package com.example.ypx_tabindicator;
 
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
-import android.graphics.Paint.Style;
 import android.graphics.drawable.GradientDrawable;
-import android.os.Build;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.text.TextPaint;
 import android.util.AttributeSet;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 /**
- * ·ÂÍøÒ×Ô²ĞÎÒÆ¶¯viewpagerÖ¸Ê¾Æ÷
- *
- * ²©¿ÍµØÖ·:http://blog.csdn.net/qq_16674697/article/details/51954228
+ * ä»¿ç½‘æ˜“åœ†å½¢ç§»åŠ¨viewpageræŒ‡ç¤ºå™¨
+ * <p>
+ * åšå®¢åœ°å€:http://blog.csdn.net/qq_16674697/article/details/51954228
  *
  * @author yangpeixing
  */
-public class NetEaseIndicator extends LinearLayout implements
-        OnPageChangeListener {
+@SuppressWarnings("unused")
+public class YPXTabIndicator extends LinearLayout implements
+        OnPageChangeListener, YPXViewPager.OnPageChangeListener {
+    private Paint mLinePaint;
+    /**
+     * è‡ªå®šä¹‰æŒ‡ç¤ºå™¨æ„é€ å™¨
+     */
+    private DrawIndicatorCreator creator;
     private int screenWidth = 0;
     /**
-     * ÄÚ²¿ÍÖÔ²±³¾°paint
+     * å†…éƒ¨æ¤­åœ†èƒŒæ™¯paint
      */
     private Paint indicatorPaint;
     /**
-     * ÍâÎ§±³¾°ÏßÌõ¿í¶È£¬Ä¬ÈÏÎª4px
+     * å¤–å›´èƒŒæ™¯çº¿æ¡å®½åº¦ï¼Œé»˜è®¤ä¸º0px
      */
-    private int strokeWidth = 4;
-
+    private int strokeWidth = 0;
     /**
-     * ±³¾°É«,£¬Ä¬ÈÏÎªºìÉ«#ff0000
+     * èƒŒæ™¯è‰²,ï¼Œé»˜è®¤ä¸ºçº¢è‰²#ff0000
      */
-    private int backgroundColor = Color.RED;
+    private int backgroundColor = Color.WHITE;
     /**
-     * ±³¾°ÏßÌõÉ«
+     * èƒŒæ™¯çº¿æ¡è‰²
      */
     private int backgroundLineColor = Color.WHITE;
     /**
-     * Ö¸Ê¾Æ÷ÑÕÉ«
+     * æŒ‡ç¤ºå™¨é¢œè‰²
      */
-    private int indicatorColor = Color.WHITE;
-
+    private int indicatorColor = Color.RED;
     /**
-     * ±³¾°ºÍÖ¸Ê¾Æ÷°ë¾¶£¬Ä¬ÈÏÎª40px
+     * èƒŒæ™¯å’ŒæŒ‡ç¤ºå™¨åŠå¾„ï¼Œé»˜è®¤ä¸º40px
      */
     private int backgroundRadius = 40;
     /**
-     * ¼ÇÂ¼tab¿í¶ÈÊı×é
+     * è®°å½•tabå®½åº¦æ•°ç»„
      */
     private int[] tabLengthArray;
-
     /**
-     * xÖáÆ«ÒÆÁ¿
+     * xè½´åç§»é‡
      */
     private int mTransitX = 0;
     /**
-     * tabÄ¬ÈÏ´óĞ¡Îª12
+     * tabé»˜è®¤å¤§å°ä¸º14
      */
-    private int tabTextSize = 12;
+    private int tabTextSize = 14;
     /**
-     * ÉèÖÃtabÄ¬ÈÏÑÕÉ«£¬¼ÈÎ´Ñ¡ÖĞÊ±ÑÕÉ«
+     * è®¾ç½®tabé»˜è®¤é¢œè‰²ï¼Œæ—¢æœªé€‰ä¸­æ—¶é¢œè‰²
      */
-    private int tabTextColor = Color.WHITE;
+    private int tabTextColor = Color.parseColor("#666666");
     /**
-     * tabÑ¡ÖĞºóÑÕÉ«,Ä¬ÈÏºÍ±³¾°É«Ò»ÖÂ
+     * tabé€‰ä¸­åé¢œè‰²,é»˜è®¤å’ŒèƒŒæ™¯è‰²ä¸€è‡´
      */
-    private int tabPressColor = backgroundColor;
-
+    private int tabPressColor = indicatorColor;
     private int mTabWidth = 0;
     private String[] titles;
     private ViewPager viewPager;
+    private YPXViewPager ypxViewPager;
     /**
-     * Ä¬ÈÏ¸ß¶È£¬ÓÃ»§¿É×Ô¼ºÉèÖÃ¸ß¶È£¬Ä¬ÈÏ50px
+     * é»˜è®¤é«˜åº¦ï¼Œç”¨æˆ·å¯è‡ªå·±è®¾ç½®é«˜åº¦ï¼Œé»˜è®¤50px
      */
     private int defaultHeight = 50;
     /**
-     * viewpager×ø±ê
+     * viewpageråæ ‡
      */
     private int mCurrentIndex = 0;
     /**
-     * Ä¬ÈÏÑ¡ÖĞµÚ¼¸¸ötab
+     * é»˜è®¤é€‰ä¸­ç¬¬å‡ ä¸ªtab
      */
     private int mInitIndex = 0;
     /**
-     * ÅĞ¶ÏÊÇ·ñµã»÷
+     * åˆ¤æ–­æ˜¯å¦ç‚¹å‡»
      */
     private boolean isClick = false;
-
     /**
-     * ÊÇ·ñÉèÖÃ±³¾°
+     * æ˜¯å¦æ˜¾ç¤ºtabä¸­é—´åˆ†å‰²çº¿
+     */
+    private boolean isShowTabDivider = false;
+    /**
+     * æ˜¯å¦è®¾ç½®èƒŒæ™¯
      */
     private boolean isShowBackground = true;
     /**
-     * ÊÇ·ñÉèÖÃÖ¸Ê¾Æ÷
+     * æ˜¯å¦è®¾ç½®æŒ‡ç¤ºå™¨
      */
     private boolean isShowIndicator = true;
     /**
-     * ÊÇ·ñÉèÖÃtab×ÖÌå±ä»»
+     * æ˜¯å¦è®¾ç½®tabå­—ä½“å˜æ¢
      */
     private boolean isShowTabSizeChange = true;
     /**
-     * ÊÇ·ñÆ½·ÖtabµÄ¿í¶È£¬Èôfalse£¬Ôò·µ»ØÃ¿¸ötab×ÔÊÊÓ¦µÄ¿í¶È£¬ÊÊºÏÔÚ¶àÖÖÊıÄ¿ÏÂÊ¹ÓÃ
+     * æ˜¯å¦å¹³åˆ†tabçš„å®½åº¦ï¼Œè‹¥falseï¼Œåˆ™è¿”å›æ¯ä¸ªtabè‡ªé€‚åº”çš„å®½åº¦ï¼Œé€‚åˆåœ¨å¤šç§æ•°ç›®ä¸‹ä½¿ç”¨
      */
-    private boolean isDeuceTabWidth = true;
+    private boolean isDeuceTabWidth = false;
     /**
-     * ¿É¼ûtabÊıÁ¿
+     * å¯è§tabæ•°é‡
      */
     private int visiableCounts = -1;
     /**
-     * ×î´ó×ÖÌå´óĞ¡£¬Ä¬ÈÏÎª14
+     * æœ€å¤§å­—ä½“å¤§å°ï¼Œé»˜è®¤ä¸º16
      */
-    private int maxTabTextSize = 14;
+    private int maxTabTextSize = 16;
     /**
-     * tab×ÜÊı
+     * tabæ€»æ•°
      */
     private int totalCount = 0;
     /**
-     * ÊÇ·ñÊÖ¶¯ÉèÖÃÁËtabµÄ¿í¶È
+     * æ˜¯å¦æ‰‹åŠ¨è®¾ç½®äº†tabçš„å®½åº¦
      */
-    private boolean isSetTabWidth=false;
+    private boolean isSetTabWidth = false;
     /**
-     * ÊÇ·ñÊÇHorizonScrollViewµÄ×ÓView
+     * æ˜¯å¦æ˜¯HorizonScrollViewçš„å­View
      */
     private boolean isChildOfHorizontalScrollView = false;
 
-    private int tabPaddingLeft = 0, tabPaddingRight = 0, tabPaddingTop = 0,
+    private int tabPaddingLeft = dp(10), tabPaddingRight = dp(10), tabPaddingTop = 0,
             tabPaddingBottom = 0;
+    /**
+     * å¯¹å¤–çš„ViewPagerçš„å›è°ƒæ¥å£
+     */
+    private PageChangeListener onPageChangeListener;
+    private TabClickListener tabClickListener;
 
-    public NetEaseIndicator(Context context) {
+    public YPXTabIndicator(Context context) {
         this(context, null);
     }
 
-    public NetEaseIndicator(Context context, AttributeSet attrs) {
+    public YPXTabIndicator(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public NetEaseIndicator(Context context, AttributeSet attrs,
-                            int defStyleAttr) {
+    public YPXTabIndicator(Context context, AttributeSet attrs,
+                           int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         setOrientation(HORIZONTAL);
         setGravity(Gravity.CENTER);
@@ -159,6 +169,7 @@ public class NetEaseIndicator extends LinearLayout implements
         mInitIndex = 0;
         mTabWidth = 0;
         mTransitX = 0;
+        defaultHeight = dp(44);
         titles = new String[]{"tab1", "tab2", "tab3"};
         tabLengthArray = new int[titles.length];
         screenWidth = ScreenUtils.getScreenWidth(getContext());
@@ -168,10 +179,10 @@ public class NetEaseIndicator extends LinearLayout implements
     }
 
     /**
-     * ÉèÖÃ±³¾°
+     * è®¾ç½®èƒŒæ™¯
      */
     private void setBackgroundShape() {
-        // ´´½¨drawable
+        // åˆ›å»ºdrawable
         GradientDrawable gd = new GradientDrawable();
         gd.setColor(backgroundColor);
         gd.setCornerRadius(backgroundRadius);
@@ -179,22 +190,22 @@ public class NetEaseIndicator extends LinearLayout implements
         if (isShowBackground) {
             setBackground(gd);
         } else {
-            setBackgroundResource(0);
+            setBackgroundColor(backgroundColor);
         }
     }
 
     /**
-     * ³õÊ¼»¯Ö¸Ê¾Æ÷»­±Ê
+     * åˆå§‹åŒ–æŒ‡ç¤ºå™¨ç”»ç¬”
      */
     private void initPaints() {
         indicatorPaint = new Paint();
         indicatorPaint.setAntiAlias(true);
         indicatorPaint.setColor(indicatorColor);
-        indicatorPaint.setStyle(Style.FILL);
+        indicatorPaint.setStyle(Paint.Style.FILL);
     }
 
     /**
-     * »ñÈ¡tab
+     * è·å–tab
      */
     private void setTabViews() {
         tabLengthArray = new int[titles.length];
@@ -207,21 +218,19 @@ public class NetEaseIndicator extends LinearLayout implements
     }
 
     /**
-     * ¸ù¾İ×ÓtextviewÊÇ·ñÆ½·Ö¿í¶ÈÀ´²âÁ¿¿É¼ûÊıÄ¿
+     * æ ¹æ®å­textviewæ˜¯å¦å¹³åˆ†å®½åº¦æ¥æµ‹é‡å¯è§æ•°ç›®
      */
     private void calculateSize() {
         totalCount = titles.length;
-        if (isDeuceTabWidth) {// Èç¹ûÆ½·Ötab¿í¶È£¬ÔòÖ±½ÓÓÃÆÁÄ»¿í³ıtab¿í
+        if (isDeuceTabWidth) {// å¦‚æœå¹³åˆ†tabå®½åº¦ï¼Œåˆ™ç›´æ¥ç”¨å±å¹•å®½é™¤tabå®½
             visiableCounts = screenWidth / mTabWidth;
-        } else {// Èç¹û²»Æ½·Ö
+        } else {// å¦‚æœä¸å¹³åˆ†
             visiableCounts = getDefaultVisiableCount();
         }
     }
 
     /**
-     * »ñÈ¡ÆÁÄ»ÖĞÏÔÊ¾µÄtab¸öÊı
-     *
-     * @return
+     * è·å–å±å¹•ä¸­æ˜¾ç¤ºçš„tabä¸ªæ•°
      */
     private int getDefaultVisiableCount() {
         int defaultNum = 0;
@@ -235,9 +244,7 @@ public class NetEaseIndicator extends LinearLayout implements
     }
 
     /**
-     * »ñÈ¡positionÇ°¼¸Ïîtab¿í¶ÈÖ®ºÍ
-     *
-     * @return
+     * è·å–positionå‰å‡ é¡¹tabå®½åº¦ä¹‹å’Œ
      */
     private int getTransitXByPosition(int posotion) {
         int defaultNum = 0;
@@ -248,10 +255,10 @@ public class NetEaseIndicator extends LinearLayout implements
     }
 
     /**
-     * ´´½¨Ä¬ÈÏtab£¨Textview£©
+     * åˆ›å»ºé»˜è®¤tabï¼ˆTextviewï¼‰
      *
-     * @param string ÒªÏÔÊ¾µÄÎÄ±¾
-     * @param i  ×ø±ê
+     * @param string è¦æ˜¾ç¤ºçš„æ–‡æœ¬
+     * @param i      åæ ‡
      */
     private TextView creatDefaultTab(String string, int i) {
         TextView textView = new TextView(getContext());
@@ -262,45 +269,52 @@ public class NetEaseIndicator extends LinearLayout implements
         textView.setPadding(tabPaddingLeft, tabPaddingTop, tabPaddingRight,
                 tabPaddingBottom);
         TextPaint mTextPaint;
-        if (isShowTabSizeChange) {//ÉèÖÃÊÇ·ñ×ÖÌå±ä»»
+        if (isShowTabSizeChange) {//è®¾ç½®æ˜¯å¦å­—ä½“å˜æ¢
             TextView dTextView = new TextView(getContext());
             dTextView.setTextSize(maxTabTextSize);
-            mTextPaint = dTextView.getPaint();//µÃµ½×î´ó³ß´çtextviewµÄPaint£¬ÓÃÓÚ²âÁ¿¿í¶È
+            mTextPaint = dTextView.getPaint();//å¾—åˆ°æœ€å¤§å°ºå¯¸textviewçš„Paintï¼Œç”¨äºæµ‹é‡å®½åº¦
         } else {
             mTextPaint = textView.getPaint();
         }
-        if(!isSetTabWidth) {
+        if (!isSetTabWidth) {
             mTabWidth = (int) mTextPaint
                     .measureText(isDeuceTabWidth ? getMaxLengthString(titles)
                             : string)
                     + tabPaddingLeft + tabPaddingRight;
         }
         tabLengthArray[i] = mTabWidth;
-        textView.setLayoutParams(new LinearLayout.LayoutParams(mTabWidth,
+        textView.setLayoutParams(new LayoutParams(mTabWidth,
                 defaultHeight + tabPaddingBottom + tabPaddingTop));
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            textView.setAllCaps(true);
-        }
         return textView;
 
+    }
+
+    public void setShowTabDivider(boolean showTabDivider) {
+        isShowTabDivider = showTabDivider;
+        invalidate();
     }
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
         defaultHeight = getMeasuredHeight();
+        if (isShowTabDivider) {
+            drawDivider(canvas);
+        }
         if (mCurrentIndex == 0) {
             mTabWidth = tabLengthArray[0];
         }
-        int left = mTransitX + mInitIndex * mTabWidth;// tab×ó±ß¾àÀëÔ­µãµÄÎ»ÖÃ
-        int right = mTabWidth + left;// Õû¸ötabµÄÎ»ÖÃ
-        int top = 0;// tab¾àÀë¶¥¶ËµÄÎ»ÖÃ
-        int bottom = defaultHeight;// Õû¸ötabµÄ¸ß¶È
+        int left = mTransitX + mInitIndex * mTabWidth + getTab(0).getLeft();// tabå·¦è¾¹è·ç¦»åŸç‚¹çš„ä½ç½®
+        int right = mTabWidth + left;// æ•´ä¸ªtabçš„ä½ç½®
+        int top = 0;// tabè·ç¦»é¡¶ç«¯çš„ä½ç½®
+        int bottom = defaultHeight;// æ•´ä¸ªtabçš„é«˜åº¦
         if (isShowIndicator) {
             if (creator != null) {
                 creator.drawIndicator(canvas, left, top, right, bottom,
                         indicatorPaint, backgroundRadius);
             } else {
-                drawIndicatorWithTransitX(canvas, left, top, right, bottom,
+//                drawIndicatorWithTransitX(canvas, left, top, right, bottom,
+//                        indicatorPaint);
+                drawUnderLineIndicatorWithTransitX(canvas, left, top, right, bottom,
                         indicatorPaint);
             }
         }
@@ -310,28 +324,51 @@ public class NetEaseIndicator extends LinearLayout implements
                     - (screenWidth - tabLengthArray[mInitIndex]) / 2;
             parentScrollto(centerX, 0);
         }
-        mInitIndex = 0;// Çå³ıµÚÒ»´ÎÄ¬ÈÏindex
+        mInitIndex = 0;// æ¸…é™¤ç¬¬ä¸€æ¬¡é»˜è®¤index
         super.dispatchDraw(canvas);
     }
 
+    private void drawDivider(Canvas canvas) {
+        if (mLinePaint == null) {
+            initLinePaint();
+        }
+        for (int i = 1; i < titles.length; i++) {
+            float x = (mTabWidth) * i;
+            float y = dp(0);
+            float endx = mTabWidth * i;
+            float endy = getMeasuredHeight() - ScreenUtils.dp2px(getContext(), 0);
+            canvas.drawLines(new float[]{x, y, endx, endy}, mLinePaint);
+        }
+    }
+
     /**
-     * Ä¬ÈÏÎªÔ²½Ç¾ØĞÎÖ¸Ê¾Æ÷£¬ÓÃ»§¿É¼Ì³ĞÖØĞ´×Ô¶¨ÒåÖ¸Ê¾Æ÷ÑùÊ½
+     * åˆå§‹åŒ–åˆ†å‰²çº¿ç”»ç¬”
+     */
+    private void initLinePaint() {
+        mLinePaint = new Paint();
+        mLinePaint.setColor(Color.parseColor("#e8e8e8"));
+        mLinePaint.setStrokeWidth(1);
+        mLinePaint.setAntiAlias(true);
+    }
+
+    /**
+     * é»˜è®¤ä¸ºåœ†è§’çŸ©å½¢æŒ‡ç¤ºå™¨ï¼Œç”¨æˆ·å¯ç»§æ‰¿é‡å†™è‡ªå®šä¹‰æŒ‡ç¤ºå™¨æ ·å¼
      *
-     * @param canvas
-     * @param left   tab×ó±ß¾àÀëÔ­µãµÄÎ»ÖÃ
-     * @param top    Õû¸ötabµÄÎ»ÖÃ
-     * @param right  tab¾àÀë¶¥¶ËµÄÎ»ÖÃ
-     * @param bottom Õû¸ötabµÄ¸ß¶È,¼È¿Ø¼ş¸ß¶È
-     * @param paint  Ö¸Ê¾Æ÷»­±Ê
+     * @param canvas ç”»å¸ƒ
+     * @param left   tabå·¦è¾¹è·ç¦»åŸç‚¹çš„ä½ç½®
+     * @param top    æ•´ä¸ªtabçš„ä½ç½®
+     * @param right  tabè·ç¦»é¡¶ç«¯çš„ä½ç½®
+     * @param bottom æ•´ä¸ªtabçš„é«˜åº¦,æ—¢æ§ä»¶é«˜åº¦
+     * @param paint  æŒ‡ç¤ºå™¨ç”»ç¬”
      */
     public void drawIndicatorWithTransitX(Canvas canvas, int left, int top,
                                           int right, int bottom, Paint paint) {
         if (backgroundRadius < defaultHeight / 2) {
-            // Õæ»úÔËĞĞÓÃÕâÖÖ·½Ê½£¬Ä£ÄâÆ÷Ô²½Ç»áÊ§Õæ
-            RectF oval = new RectF(left, top, right, bottom);// ÉèÖÃ¸öĞÂµÄ³¤·½ĞÎ£¬É¨Ãè²âÁ¿
+            // çœŸæœºè¿è¡Œç”¨è¿™ç§æ–¹å¼ï¼Œæ¨¡æ‹Ÿå™¨åœ†è§’ä¼šå¤±çœŸ
+            RectF oval = new RectF(left, top, right, bottom);// è®¾ç½®ä¸ªæ–°çš„é•¿æ–¹å½¢ï¼Œæ‰«ææµ‹é‡
             canvas.drawRoundRect(oval, backgroundRadius, backgroundRadius,
                     paint);
-        } else {// »­Èı¶Î´úÌæÔ²½Ç¾ØĞÎ£¬¼ÈÔ²¡¢¾ØĞÎ¡¢Ô²
+        } else {// ç”»ä¸‰æ®µä»£æ›¿åœ†è§’çŸ©å½¢ï¼Œæ—¢åœ†ã€çŸ©å½¢ã€åœ†
             RectF oval2 = new RectF(bottom / 2 + left, top, right - bottom / 2,
                     bottom);
             canvas.drawCircle(oval2.left, bottom / 2, bottom / 2,
@@ -346,19 +383,30 @@ public class NetEaseIndicator extends LinearLayout implements
         this.mCurrentIndex = index;
         mInitIndex = index;
         setItemClickEvent();
-        if (getParent() != null
-                && (getParent() instanceof HorizontalScrollView)) {
-            isChildOfHorizontalScrollView = true;
-        }
-        viewPager.setOnPageChangeListener(this);
+        isChildOfHorizontalScrollView = (getParent() != null
+                && (getParent() instanceof HorizontalScrollView));
+
+        viewPager.addOnPageChangeListener(this);
         setmCurrentIndex(index);
     }
 
+    public void setViewPager(YPXViewPager viewPager, int index) {
+        this.ypxViewPager = viewPager;
+        this.mCurrentIndex = index;
+        mInitIndex = index;
+        setItemClickEvent();
+        isChildOfHorizontalScrollView = (getParent() != null
+                && (getParent() instanceof HorizontalScrollView));
+        ypxViewPager.setOnPageChangeListener(this);
+        setmCurrentIndex(index);
+
+    }
+
     /**
-     * Èç¹û¸¸¿Ø¼şÊÇHorizonScrollView£¬Ôò¿ØÖÆ¸¸¿Ø¼şÒÆ¶¯
+     * å¦‚æœçˆ¶æ§ä»¶æ˜¯HorizonScrollViewï¼Œåˆ™æ§åˆ¶çˆ¶æ§ä»¶ç§»åŠ¨
      *
-     * @param x
-     * @param y
+     * @param x x
+     * @param y y
      */
     public void parentScrollto(int x, int y) {
         if (isChildOfHorizontalScrollView) {
@@ -367,10 +415,10 @@ public class NetEaseIndicator extends LinearLayout implements
     }
 
     /**
-     * ÉèÖÃÑÕÉ«±ä»»
+     * è®¾ç½®é¢œè‰²å˜æ¢
      *
-     * @param position
-     * @param positionOffset
+     * @param position       ç´¢å¼•
+     * @param positionOffset å˜åŒ–å› å­
      */
     protected void setTabColorChange(int position, float positionOffset) {
         getTab(position).setTextColor(
@@ -379,10 +427,10 @@ public class NetEaseIndicator extends LinearLayout implements
     }
 
     /**
-     * ÉèÖÃ×ÖÌå´óĞ¡±ä»»
+     * è®¾ç½®å­—ä½“å¤§å°å˜æ¢
      *
-     * @param position
-     * @param positionOffset
+     * @param position       ç´¢å¼•
+     * @param positionOffset å˜åŒ–å› å­
      */
     protected void setTabSizeChange(int position, float positionOffset) {
         getTab(position).setTextSize(
@@ -390,7 +438,7 @@ public class NetEaseIndicator extends LinearLayout implements
     }
 
     /**
-     * ÉèÖÃµã»÷ÊÂ¼ş
+     * è®¾ç½®ç‚¹å‡»äº‹ä»¶
      */
     public void setItemClickEvent() {
         for (int i = 0; i < totalCount; i++) {
@@ -399,32 +447,34 @@ public class NetEaseIndicator extends LinearLayout implements
                 @Override
                 public void onClick(View v) {
                     isClick = true;
-                    if (viewPager != null && viewPager.getAdapter() != null)
-                        viewPager.setCurrentItem(j);
+                    setmCurrentIndex(j);
+                    if (tabClickListener != null) {
+                        tabClickListener.onClick((TextView) v, j);
+                    }
                 }
             });
         }
     }
 
     /**
-     * Á½¸ö´óĞ¡½¥±ä
+     * ä¸¤ä¸ªå¤§å°æ¸å˜
      *
-     * @param minSize
-     * @param maxSize
-     * @param ratio
-     * @return
+     * @param minSize æœ€å°å°ºå¯¸
+     * @param maxSize æœ€å¤§å°ºå¯¸
+     * @param ratio   æ¸å˜ç‡
+     * @return è®¡ç®—åçš„å°ºå¯¸
      */
     private float blendSize(int minSize, int maxSize, float ratio) {
         return (minSize + (maxSize - minSize) * ratio * 1.0f);
     }
 
     /**
-     * Á½¸öÑÕÉ«½¥±ä×ª»¯
+     * ä¸¤ä¸ªé¢œè‰²æ¸å˜è½¬åŒ–
      *
-     * @param color1
-     * @param color2
-     * @param ratio
-     * @return
+     * @param color1 é»˜è®¤è‰²
+     * @param color2 ç›®æ ‡è‰²
+     * @param ratio  æ¸å˜ç‡ï¼ˆ0~1ï¼‰
+     * @return è®¡ç®—åçš„é¢œè‰²
      */
     private int blendColors(int color1, int color2, float ratio) {
         final float inverseRation = 1f - ratio;
@@ -442,15 +492,28 @@ public class NetEaseIndicator extends LinearLayout implements
     }
 
     /**
-     * ÉèÖÃÖ¸Ê¾Æ÷ÄÚÈİ,Ä¬ÈÏtab1£¬tab2£¬tab3
+     * è®¾ç½®æŒ‡ç¤ºå™¨å†…å®¹,é»˜è®¤tab1ï¼Œtab2ï¼Œtab3
      *
-     * @param titles
+     * @param titles è®¾ç½®æ ‡é¢˜æ•°ç»„
      */
     public void setTitles(String[] titles) {
         if (titles != null && titles.length > 0) {
             this.titles = titles;
             setTabViews();
             setItemClickEvent();
+            setCanScrollPamas(titles.length > getVisiableCounts());
+        }
+    }
+
+    private void setCanScrollPamas(boolean isCanScroll) {
+        if (isChildOfHorizontalScrollView) {
+            FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) this.getLayoutParams();
+            if (isCanScroll) {
+                params.gravity = Gravity.LEFT;
+            } else {
+                params.gravity = Gravity.CENTER;
+            }
+            this.setLayoutParams(params);
         }
     }
 
@@ -458,28 +521,32 @@ public class NetEaseIndicator extends LinearLayout implements
         return viewPager;
     }
 
+    public YPXViewPager getYPXViewPager() {
+        return ypxViewPager;
+    }
+
     public int getDefaultHeight() {
         return defaultHeight;
     }
 
     /**
-     * ÉèÖÃtab´óĞ¡£¬Ä¬ÈÏ´óĞ¡Îª12
+     * è®¾ç½®æŒ‡ç¤ºå™¨é«˜åº¦ï¼Œé»˜è®¤50px
      *
-     * @param tabTextSize
-     */
-    public void setTabTextSize(int tabTextSize) {
-        this.tabTextSize = tabTextSize;
-        resetTabSize();
-    }
-
-    /**
-     * ÉèÖÃÖ¸Ê¾Æ÷¸ß¶È£¬Ä¬ÈÏ50px
-     *
-     * @param defaultHeight
+     * @param defaultHeight æŒ‡ç¤ºå™¨é«˜åº¦
      */
     public void setDefaultHeight(int defaultHeight) {
         this.defaultHeight = defaultHeight;
         setTabViews();
+    }
+
+    /**
+     * è®¾ç½®tabå¤§å°ï¼Œé»˜è®¤å¤§å°ä¸º14
+     *
+     * @param tabTextSize æ­£å¸¸å°ºå¯¸
+     */
+    public void setTabTextSize(int tabTextSize) {
+        this.tabTextSize = tabTextSize;
+        resetTabSize();
     }
 
     public int getStrokeWidth() {
@@ -487,9 +554,9 @@ public class NetEaseIndicator extends LinearLayout implements
     }
 
     /**
-     * ÉèÖÃÍâ¿ò¿í¶È£¬Ä¬ÈÏÎª4px
+     * è®¾ç½®å¤–æ¡†å®½åº¦ï¼Œé»˜è®¤ä¸º0px
      *
-     * @param strokeWidth
+     * @param strokeWidth èƒŒæ™¯è¾¹æ¡†å®½åº¦
      */
     public void setBackgroundStrokeWidth(int strokeWidth) {
         this.strokeWidth = strokeWidth;
@@ -497,10 +564,10 @@ public class NetEaseIndicator extends LinearLayout implements
     }
 
     /**
-     * »ñÈ¡tab
+     * è·å–tab
      *
-     * @param i
-     * @return
+     * @param i ç´¢å¼•
+     * @return è¯¥ç´¢å¼•å¯¹åº”çš„tabï¼ˆtextViewï¼‰
      */
     public TextView getTab(int i) {
         if (i < titles.length) {
@@ -511,7 +578,7 @@ public class NetEaseIndicator extends LinearLayout implements
     }
 
     /**
-     * ÖØÖÃtabÑÕÉ«
+     * é‡ç½®tabé¢œè‰²
      */
     public void resetTabColor() {
         for (int i = 0; i < totalCount; i++) {
@@ -520,7 +587,7 @@ public class NetEaseIndicator extends LinearLayout implements
     }
 
     /**
-     * ÖØÖÃtab´óĞ¡
+     * é‡ç½®tabå¤§å°
      */
     public void resetTabSize() {
         for (int i = 0; i < totalCount; i++) {
@@ -533,9 +600,9 @@ public class NetEaseIndicator extends LinearLayout implements
     }
 
     /**
-     * ÉèÖÃtabÄ¬ÈÏÑÕÉ«£¬¼ÈÎ´Ñ¡ÖĞÊ±ÑÕÉ«£¬Ä¬ÈÏÎª°×É«
+     * è®¾ç½®tabé»˜è®¤é¢œè‰²ï¼Œæ—¢æœªé€‰ä¸­æ—¶é¢œè‰²ï¼Œé»˜è®¤ä¸ºçº¢è‰²
      *
-     * @param tabTextColor
+     * @param tabTextColor æ–‡å­—é¢œè‰²
      */
     public void setTabTextColor(int tabTextColor) {
         this.tabTextColor = tabTextColor;
@@ -549,9 +616,9 @@ public class NetEaseIndicator extends LinearLayout implements
     }
 
     /**
-     * ÉèÖÃ±³¾°É«,Í¬Ê±Ò²ÊÇÑ¡ÖĞtabµÄÎÄ±¾ÑÕÉ«£¬Ä¬ÈÏÎªºìÉ«
+     * è®¾ç½®èƒŒæ™¯è‰²,åŒæ—¶ä¹Ÿæ˜¯é€‰ä¸­tabçš„æ–‡æœ¬é¢œè‰²ï¼Œé»˜è®¤ä¸ºç™½è‰²
      *
-     * @param backgroundColor
+     * @param backgroundColor èƒŒæ™¯è‰²
      */
     public void setmBackgroundColor(int backgroundColor) {
         this.backgroundColor = backgroundColor;
@@ -563,9 +630,9 @@ public class NetEaseIndicator extends LinearLayout implements
     }
 
     /**
-     * ÉèÖÃ±³¾°Ô²½Ç´óĞ¡£¬Ä¬ÈÏÎª40px
+     * è®¾ç½®èƒŒæ™¯åœ†è§’å¤§å°ï¼Œé»˜è®¤ä¸º40px
      *
-     * @param backgroundRadius
+     * @param backgroundRadius èƒŒæ™¯åœ†è§’å¤§å°
      */
     public void setBackgroundRadius(int backgroundRadius) {
         this.backgroundRadius = backgroundRadius;
@@ -573,9 +640,9 @@ public class NetEaseIndicator extends LinearLayout implements
     }
 
     /**
-     * ÉèÖÃÍâ¿òÑÕÉ«,Ä¬ÈÏÎª°×É«
+     * è®¾ç½®å¤–æ¡†é¢œè‰²,é»˜è®¤ä¸ºç™½è‰²
      *
-     * @param backgroundLineColor
+     * @param backgroundLineColor å¤–æ¡†é¢œè‰²
      */
     public void setBackgroundLineColor(int backgroundLineColor) {
         this.backgroundLineColor = backgroundLineColor;
@@ -583,25 +650,35 @@ public class NetEaseIndicator extends LinearLayout implements
     }
 
     /**
-     * »ñÈ¡µ±Ç°viewpagerÑ¡ÖĞÏî
+     * è·å–å½“å‰viewpageré€‰ä¸­é¡¹
      *
-     * @return
+     * @return è·å–å½“å‰é€‰ä¸­é¡¹
      */
     public int getmCurrentIndex() {
         return mCurrentIndex;
     }
 
     /**
-     * ÉèÖÃÄ¬ÈÏÏî
+     * è®¾ç½®é»˜è®¤é¡¹
      *
-     * @param mCurrentIndex
+     * @param mCurrentIndex é»˜è®¤
      */
-    private void setmCurrentIndex(int mCurrentIndex) {
+    public void setmCurrentIndex(final int mCurrentIndex) {
         this.mCurrentIndex = mCurrentIndex;
+        if (ypxViewPager != null && ypxViewPager.getAdapter() != null) {
+            ypxViewPager.setCurrentItem(mCurrentIndex, true);
+        }
+
         if (viewPager != null && viewPager.getAdapter() != null) {
             viewPager.setCurrentItem(mCurrentIndex, true);
         }
 
+        postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                pressTab(mCurrentIndex);
+            }
+        }, 50);
     }
 
     public boolean isShowBackground() {
@@ -609,9 +686,9 @@ public class NetEaseIndicator extends LinearLayout implements
     }
 
     /**
-     * ÊÇ·ñÏÔÊ¾±³¾°
+     * æ˜¯å¦æ˜¾ç¤ºèƒŒæ™¯
      *
-     * @param isShowBackground
+     * @param isShowBackground æ˜¯å¦æ˜¾ç¤ºèƒŒæ™¯
      */
     public void setShowBackground(boolean isShowBackground) {
         this.isShowBackground = isShowBackground;
@@ -623,9 +700,9 @@ public class NetEaseIndicator extends LinearLayout implements
     }
 
     /**
-     * ÊÇ·ñÏÔÊ¾Ö¸Ê¾Æ÷
+     * æ˜¯å¦æ˜¾ç¤ºæŒ‡ç¤ºå™¨
      *
-     * @param isShowIndicator
+     * @param isShowIndicator æ˜¯å¦æ˜¾ç¤ºæŒ‡ç¤ºå™¨
      */
     public void setShowIndicator(boolean isShowIndicator) {
         this.isShowIndicator = isShowIndicator;
@@ -637,9 +714,9 @@ public class NetEaseIndicator extends LinearLayout implements
     }
 
     /**
-     * ÉèÖÃÖ¸Ê¾Æ÷ÑÕÉ«£¬Ä¬ÈÏÎª°×É«
+     * è®¾ç½®æŒ‡ç¤ºå™¨é¢œè‰²ï¼Œé»˜è®¤ä¸ºçº¢è‰²
      *
-     * @param indicatorColor
+     * @param indicatorColor æŒ‡ç¤ºå™¨é¢œè‰²
      */
     public void setIndicatorColor(int indicatorColor) {
         this.indicatorColor = indicatorColor;
@@ -648,9 +725,9 @@ public class NetEaseIndicator extends LinearLayout implements
     }
 
     /**
-     * ÉèÖÃ×î´ó×ÖÌå´óĞ¡,Ä¬ÈÏÎª14
+     * è®¾ç½®æœ€å¤§å­—ä½“å¤§å°,é»˜è®¤ä¸º16
      *
-     * @param maxTabTextSize
+     * @param maxTabTextSize æœ€å¤§å­—ä½“å°ºå¯¸
      */
     public void setTabMaxTextSize(int maxTabTextSize) {
         this.maxTabTextSize = maxTabTextSize;
@@ -666,20 +743,25 @@ public class NetEaseIndicator extends LinearLayout implements
     }
 
     /**
-     * ÉèÖÃtabµÄ¿í¶È
+     * è®¾ç½®tabçš„å®½åº¦
      *
-     * @param mTabWidth
+     * @param mTabWidth å¼ºåˆ¶è®¾ç½®æ¯ä¸ªtabçš„å®½åº¦
      */
     public void setTabWidth(int mTabWidth) {
+        if (mTabWidth < 0) {
+            this.isSetTabWidth = false;
+            setTabViews();
+            return;
+        }
         this.mTabWidth = mTabWidth;
-        this.isSetTabWidth=true;
+        this.isSetTabWidth = true;
         setTabViews();
     }
 
     /**
-     * ÊÇ·ñÉèÖÃtab×ÖÌå±ä»»Ğ§¹û
+     * æ˜¯å¦è®¾ç½®tabå­—ä½“å˜æ¢æ•ˆæœ
      *
-     * @param isShowTabSizeChange
+     * @param isShowTabSizeChange æ˜¯å¦æ˜¾ç¤ºtabå­—ä½“å¤§å°å˜æ¢æ•ˆæœ
      */
     public void setShowTabSizeChange(boolean isShowTabSizeChange) {
         this.isShowTabSizeChange = isShowTabSizeChange;
@@ -690,21 +772,21 @@ public class NetEaseIndicator extends LinearLayout implements
     }
 
     /**
-     * ÉèÖÃtabÑ¡ÖĞÑÕÉ«£¬Ä¬ÈÏÎªºìÉ«#ff0000
+     * è®¾ç½®tabé€‰ä¸­é¢œè‰²ï¼Œé»˜è®¤ä¸ºçº¢è‰²#ff0000
      *
-     * @param tabPressColor
+     * @param tabPressColor tabé€‰ä¸­çš„é¢œè‰²
      */
     public void setTabPressColor(int tabPressColor) {
         this.tabPressColor = tabPressColor;
     }
 
     /**
-     * ÉèÖÃtabµÄ±ß¾à,Ä¬ÈÏ¶¼Îª0
+     * è®¾ç½®tabçš„è¾¹è·,é»˜è®¤å·¦å³ä¸º10dpï¼Œä¸Šä¸‹æ— é—´è·
      *
-     * @param l
-     * @param t
-     * @param r
-     * @param b
+     * @param l å·¦
+     * @param t ä¸Š
+     * @param r å³
+     * @param b ä¸‹
      */
     public void setTabPadding(int l, int t, int r, int b) {
         this.tabPaddingLeft = l;
@@ -719,9 +801,9 @@ public class NetEaseIndicator extends LinearLayout implements
     }
 
     /**
-     * ÊÇ·ñÆ½·ÖtabµÄ¿í¶È£¬Èôfalse£¬Ôò·µ»ØÃ¿¸ötab×ÔÊÊÓ¦µÄ¿í¶È£¬ÊÊºÏÔÚ¶àÖÖÊıÄ¿ÏÂÊ¹ÓÃ
+     * æ˜¯å¦å¹³åˆ†tabçš„å®½åº¦ï¼Œè‹¥falseï¼Œåˆ™è¿”å›æ¯ä¸ªtabè‡ªé€‚åº”çš„å®½åº¦ï¼Œé€‚åˆåœ¨å¤šç§æ•°ç›®ä¸‹ä½¿ç”¨
      *
-     * @param isDeuceTabWidth
+     * @param isDeuceTabWidth æ˜¯å¦å¹³åˆ†
      */
     public void setDeuceTabWidth(boolean isDeuceTabWidth) {
         this.isDeuceTabWidth = isDeuceTabWidth;
@@ -729,10 +811,10 @@ public class NetEaseIndicator extends LinearLayout implements
     }
 
     /**
-     * »ñÈ¡tabÖĞ×î³¤µÄtabÎÄ±¾×÷Îª×îĞ¡tab¿í¶È
+     * è·å–tabä¸­æœ€é•¿çš„tabæ–‡æœ¬ä½œä¸ºæœ€å°tabå®½åº¦
      *
-     * @param arrStr
-     * @return
+     * @param arrStr tabæ–‡æœ¬æ•°ç»„
+     * @return è·å–æœ€å¤§çš„tabæ–‡æœ¬
      */
     private String getMaxLengthString(String[] arrStr) {
         String max = arrStr[0];
@@ -744,7 +826,7 @@ public class NetEaseIndicator extends LinearLayout implements
     }
 
     /**
-     * ÖØÖÃÊıÖµ
+     * é‡ç½®æ•°å€¼
      */
     public void resetData() {
         initView();
@@ -752,78 +834,38 @@ public class NetEaseIndicator extends LinearLayout implements
     }
 
     /**
-     * Ö¸Ê¾Æ÷ÊµÏÖÕß
+     * è®¾ç½®æŒ‡ç¤ºå™¨æ ·å¼ï¼Œé»˜è®¤ä¸ºä¸‹åˆ’çº¿æ ·å¼ï¼Œå¯å®šåˆ¶æˆç½‘æ˜“æ ·å¼
      *
-     * @author yangpeixing
-     */
-    public interface DrawIndicatorCreator {
-        /**
-         * Ä¬ÈÏÎªÔ²½Ç¾ØĞÎÖ¸Ê¾Æ÷£¬ÓÃ»§¿É¼Ì³ĞÖØĞ´×Ô¶¨ÒåÖ¸Ê¾Æ÷ÑùÊ½
-         *
-         * @param canvas
-         * @param left   tab×ó±ß¾àÀëÔ­µãµÄÎ»ÖÃ
-         * @param top    Õû¸ötabµÄÎ»ÖÃ
-         * @param right  tab¾àÀë¶¥¶ËµÄÎ»ÖÃ
-         * @param bottom Õû¸ötabµÄ¸ß¶È,¼È¿Ø¼ş¸ß¶È
-         * @param paint  Ö¸Ê¾Æ÷»­±Ê
-         * @param raduis ÍâÎ§Ô²½Ç°ë¾¶
-         */
-        void drawIndicator(Canvas canvas, int left, int top, int right,
-                           int bottom, Paint paint, int raduis);
-    }
-
-    DrawIndicatorCreator creator;
-
-    /**
-     * ÉèÖÃÖ¸Ê¾Æ÷ÑùÊ½£¬Ä¬ÈÏÎªÔ²ÇòÑùÊ½£¬¼ÈÍøÒ×ÑùÊ½
-     *
-     * @param creator
+     * @param creator æ„é€ å™¨
      */
     public void setDrawIndicatorCreator(DrawIndicatorCreator creator) {
         this.creator = creator;
     }
 
     /**
-     * ¶ÔÍâµÄViewPagerµÄ»Øµ÷½Ó¿Ú
+     * å¯¹å¤–çš„ViewPagerçš„å›è°ƒæ¥å£çš„è®¾ç½®
      *
-     * @author yangpeixing
-     */
-    public interface PageChangeListener {
-         void onPageScrolled(int position, float positionOffset,
-                                   int positionOffsetPixels);
-
-         void onPageSelected(int position);
-
-         void onPageScrollStateChanged(int state);
-    }
-
-    /**
-     * ¶ÔÍâµÄViewPagerµÄ»Øµ÷½Ó¿Ú
-     */
-    private PageChangeListener onPageChangeListener;
-
-    /**
-     * ¶ÔÍâµÄViewPagerµÄ»Øµ÷½Ó¿ÚµÄÉèÖÃ
-     *
-     * @param pageChangeListener
+     * @param pageChangeListener æ»‘åŠ¨æ¥å£
      */
     public void setOnPageChangeListener(PageChangeListener pageChangeListener) {
         this.onPageChangeListener = pageChangeListener;
     }
 
+    /**
+     * å¯¹å¤–çš„è®¾ç½®tabç‚¹å‡»å›è°ƒ
+     *
+     * @param tabClickListener tabç‚¹å‡»å›è°ƒ
+     */
+    public void setOnTabClickListener(TabClickListener tabClickListener) {
+        this.tabClickListener = tabClickListener;
+    }
+
     @Override
     public void onPageScrollStateChanged(int state) {
-        if (state == ViewPager.SCROLL_STATE_IDLE) {
+        if (state == ViewPager.SCROLL_STATE_IDLE) {//æ»‘åŠ¨åœæ­¢ï¼Œå…³é—­ç‚¹å‡»
             isClick = false;
-            if (mCurrentIndex > visiableCounts / 2 - 1
-                    && mCurrentIndex < titles.length) {
-                int centerX = getTransitXByPosition(mCurrentIndex)
-                        - (screenWidth - tabLengthArray[mCurrentIndex]) / 2;
-                parentScrollto(centerX, 0);
-            }
         }
-        // »Øµ÷
-        if (onPageChangeListener != null) {
+        if (onPageChangeListener != null) {  // å›è°ƒ
             onPageChangeListener.onPageScrollStateChanged(state);
         }
     }
@@ -831,27 +873,34 @@ public class NetEaseIndicator extends LinearLayout implements
     @Override
     public void onPageScrolled(int position, float positionOffset,
                                int positionOffsetPixels) {
-        /*if (isDeuceTabWidth && mCurrentIndex > visiableCounts / 2 - 1
-				&& mCurrentIndex < titles.length) {
-			this.scrollTo((position - (visiableCounts - 2)) * mTabWidth
-					+ (int) (mTabWidth * positionOffset), 0);
-		}*/
-        if (position + 1 != totalCount && !isClick && position < totalCount) {
-            if (isShowTabSizeChange) {// ÅĞ¶ÏÊÇ·ñ±ä»»
-                setTabSizeChange(position, 1 - positionOffset);
-                setTabSizeChange(position + 1, positionOffset);
-            }
-            setTabColorChange(position, 1 - positionOffset);
-            setTabColorChange(position + 1, positionOffset);
+        if (isClick || position + 1 >= totalCount) {
+            return;
         }
-        if (positionOffset != 0.0 && position < totalCount - 1) {
+
+        if (position > visiableCounts / 2 - 1) {
+            int centerX = (int) ((getTransitXByPosition(position)) - (screenWidth - tabLengthArray[position]) / 2
+                    + tabLengthArray[position] * positionOffset);
+           // int centerX = getTransitXByPosition(position);
+            parentScrollto(centerX, 0);
+        } else {
+            parentScrollto(0, 0);
+        }
+
+        if (isShowTabSizeChange) {// åˆ¤æ–­æ˜¯å¦å˜æ¢
+            setTabSizeChange(position, 1 - positionOffset);
+            setTabSizeChange(position + 1, positionOffset);
+        }
+        setTabColorChange(position, 1 - positionOffset);
+        setTabColorChange(position + 1, positionOffset);
+
+        if (positionOffset != 0.0) {
             mTransitX = (int) (tabLengthArray[position] * positionOffset + (getTransitXByPosition(position)));
             mTabWidth = (int) (tabLengthArray[position] + (tabLengthArray[position + 1] - tabLengthArray[position])
                     * positionOffset);
         }
+
         invalidate();
-        // »Øµ÷
-        if (onPageChangeListener != null) {
+        if (onPageChangeListener != null) { // å›è°ƒ
             onPageChangeListener.onPageScrolled(position, positionOffset,
                     positionOffsetPixels);
         }
@@ -860,22 +909,91 @@ public class NetEaseIndicator extends LinearLayout implements
     @Override
     public void onPageSelected(int arg0) {
         mCurrentIndex = arg0;
-        if (isClick) {
-            resetTabColor();
-            resetTabSize();
-            getTab(arg0).setTextColor(tabPressColor);
-            if (isShowTabSizeChange) {
-                getTab(arg0).setTextSize(maxTabTextSize);
-            } else {
-                getTab(arg0).setTextSize(tabTextSize);
-            }
-        }
-        if (arg0 == 0 && isChildOfHorizontalScrollView) {
-            ((HorizontalScrollView) getParent()).scrollTo(0, 0);
-        }
         if (onPageChangeListener != null) {
             onPageChangeListener.onPageSelected(arg0);
         }
+    }
+
+    public void pressTab(int index) {
+        resetTabColor();
+        resetTabSize();
+        getTab(index).setTextColor(tabPressColor);
+        if (isShowTabSizeChange) {
+            getTab(index).setTextSize(maxTabTextSize);
+        } else {
+            getTab(index).setTextSize(tabTextSize);
+        }
+        mTransitX = getTransitXByPosition(index);
+        mTabWidth = tabLengthArray[index];
+        invalidate();
+    }
+
+    /**
+     * ä¸‹åˆ’çº¿æŒ‡ç¤ºå™¨
+     *
+     * @param canvas ç”»å¸ƒ
+     * @param left   å·¦è¾¹è·
+     * @param top    ä¸Šè¾¹è·
+     * @param right  å³è¾¹è·
+     * @param bottom ä¸‹è¾¹è·
+     * @param paint  ç”»ç¬”
+     */
+    public void drawUnderLineIndicatorWithTransitX(Canvas canvas, int left,
+                                                   int top, int right, int bottom, Paint paint) {
+        RectF oval = new RectF(left, bottom - dp(3), right, bottom);
+        canvas.drawRect(oval, paint);
+    }
+
+
+    public int dp(int dp) {
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                dp, this.getResources().getDisplayMetrics());
+    }
+
+
+    /**
+     * æŒ‡ç¤ºå™¨å®ç°è€…
+     *
+     * @author yangpeixing
+     */
+    public interface DrawIndicatorCreator {
+        /**
+         * é»˜è®¤ä¸ºåœ†è§’çŸ©å½¢æŒ‡ç¤ºå™¨ï¼Œç”¨æˆ·å¯ç»§æ‰¿é‡å†™è‡ªå®šä¹‰æŒ‡ç¤ºå™¨æ ·å¼
+         *
+         * @param canvas ç”»å¸ƒ
+         * @param left   tabå·¦è¾¹è·ç¦»åŸç‚¹çš„ä½ç½®
+         * @param top    æ•´ä¸ªtabçš„ä½ç½®
+         * @param right  tabè·ç¦»é¡¶ç«¯çš„ä½ç½®
+         * @param bottom æ•´ä¸ªtabçš„é«˜åº¦,æ—¢æ§ä»¶é«˜åº¦
+         * @param paint  æŒ‡ç¤ºå™¨ç”»ç¬”
+         * @param raduis å¤–å›´åœ†è§’åŠå¾„
+         */
+        void drawIndicator(Canvas canvas, int left, int top, int right,
+                           int bottom, Paint paint, int raduis);
+    }
+
+
+    /**
+     * å¯¹å¤–çš„ViewPagerçš„å›è°ƒæ¥å£
+     *
+     * @author yangpeixing
+     */
+    public interface PageChangeListener {
+        void onPageScrolled(int position, float positionOffset,
+                            int positionOffsetPixels);
+
+        void onPageSelected(int position);
+
+        void onPageScrollStateChanged(int state);
+    }
+
+    /**
+     * å¯¹å¤–çš„ViewPagerçš„å›è°ƒæ¥å£
+     *
+     * @author yangpeixing
+     */
+    public interface TabClickListener {
+        void onClick(TextView tab, int position);
     }
 
 }

@@ -1,25 +1,22 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#ffffff"
     android:gravity="center"
-    android:orientation="vertical" >
+    android:orientation="vertical">
 
     <HorizontalScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="50dp"
+        android:background="#ff0000"
         android:overScrollMode="never"
-        android:scrollbars="none"
-        android:background="#ff0000">
+        android:scrollbars="none">
 
-        <com.example.ypx_neteaseindicator.NetEaseIndicator
+        <com.example.ypx_tabindicator.YPXTabIndicator
             android:id="@+id/netEaseIndicator1"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="6dp"
-            android:layout_gravity="center">
-        </com.example.ypx_neteaseindicator.NetEaseIndicator>
+            android:layout_height="30dp"
+            android:layout_gravity="center" />
     </HorizontalScrollView>
 
     <View
@@ -31,16 +28,14 @@
     <HorizontalScrollView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="#ffffff"
         android:overScrollMode="never"
-        android:scrollbars="none"
-        android:background="#ffffff">
+        android:scrollbars="none">
 
-        <com.example.ypx_neteaseindicator.NetEaseIndicator
+        <com.example.ypx_tabindicator.YPXTabIndicator
             android:id="@+id/netEaseIndicator2"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="6dp" >
-        </com.example.ypx_neteaseindicator.NetEaseIndicator>
+            android:layout_height="wrap_content" />
     </HorizontalScrollView>
 
     <View
@@ -53,15 +48,14 @@
         android:id="@+id/id_vp"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1" >
-    </android.support.v4.view.ViewPager>
+        android:layout_weight="1" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#ffffff"
         android:gravity="center"
-        android:orientation="horizontal" >
+        android:orientation="horizontal">
 
         <Button
             android:id="@+id/bt_style"

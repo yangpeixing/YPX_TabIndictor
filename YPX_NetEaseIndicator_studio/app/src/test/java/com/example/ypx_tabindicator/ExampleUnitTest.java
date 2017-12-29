@@ -1,4 +1,4 @@
-package com.example.ypx_neteaseindicator;
+package com.example.ypx_tabindicator;
 
 import org.junit.Test;
 

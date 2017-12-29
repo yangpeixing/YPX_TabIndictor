@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="Encoding">
-    <file url="file://$PROJECT_DIR$/app/src/main/java/com/example/ypx_neteaseindicator/NetEaseIndicator.java" charset="GBK" />
-    <file url="file://$PROJECT_DIR$/app/src/main/java/com/example/ypx_neteaseindicator/ScreenUtils.java" charset="GBK" />
-    <file url="file://$PROJECT_DIR$/app/src/main/java/com/example/ypx_neteaseindicator/UnderLineIndicator.java" charset="GBK" />
+    <file url="file://$PROJECT_DIR$/app/src/main/java/com/example/ypx_tabindicator/ScreenUtils.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/java/com/example/ypx_tabindicator/UnderLineIndicator.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/app/src/main/java/com/example/ypx_tabindicator/YPXTabIndicator.java" charset="UTF-8" />
     <file url="PROJECT" charset="UTF-8" />
   </component>
 </project>

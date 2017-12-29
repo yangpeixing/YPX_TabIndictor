@@ -1,7 +1,7 @@
 /**
- * 
+ *
  */
-package com.example.ypx_neteaseindicator;
+package com.example.ypx_tabindicator;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -11,9 +11,9 @@ import android.util.AttributeSet;
 
 /**
  * @author yangpeixing
- * 
+ *
  */
-public class UnderLineIndicator extends NetEaseIndicator {
+public class UnderLineIndicator extends YPXTabIndicator {
 
 	/**
 	 * @param context
@@ -36,39 +36,39 @@ public class UnderLineIndicator extends NetEaseIndicator {
 	 * @param defStyleAttr
 	 */
 	public UnderLineIndicator(Context context, AttributeSet attrs,
-			int defStyleAttr) {
+							  int defStyleAttr) {
 		super(context, attrs, defStyleAttr);
 	}
 
 	@Override
 	public void drawIndicatorWithTransitX(Canvas canvas, int left,
-			int top, int right, int bottom, Paint paint) {
+										  int top, int right, int bottom, Paint paint) {
 		this.drawRoundRectIndicatorWithTransitX(canvas, left, top, right,
 				bottom, paint);
 	}
 	/**
-	 * ÏÂ»®ÏßÖ¸Ê¾Æ÷
-	 * 
+	 * ä¸‹åˆ’çº¿æŒ‡ç¤ºå™¨
+	 *
 	 * @param canvas
 	 */
 	public void drawUnderLineIndicatorWithTransitX(Canvas canvas, int left,
-			int top, int right, int bottom, Paint paint) {
+												   int top, int right, int bottom, Paint paint) {
 		RectF oval = new RectF(left, bottom - 10, right, bottom);
 		canvas.drawRect(oval, paint);
 	}
 	/**
-	 * Ô²½Ç¾ØÐÎÖ¸Ê¾Æ÷
-	 * 
+	 * åœ†è§’çŸ©å½¢æŒ‡ç¤ºå™¨
+	 *
 	 * @param canvas
 	 */
 	public void drawRoundRectIndicatorWithTransitX(Canvas canvas, int left, int top,
-			int right, int bottom, Paint paint) {
+												   int right, int bottom, Paint paint) {
 		if (getBackgroundRadius() < bottom / 2) {
-			// Õæ»úÔËÐÐÓÃÕâÖÖ·½Ê½£¬Ä£ÄâÆ÷Ô²½Ç»áÊ§Õæ
+			// çœŸæœºè¿è¡Œç”¨è¿™ç§æ–¹å¼ï¼Œæ¨¡æ‹Ÿå™¨åœ†è§’ä¼šå¤±çœŸ
 			RectF oval = new RectF(left, top, right, bottom);
 			canvas.drawRoundRect(oval, getBackgroundRadius(), getBackgroundRadius(),
 					paint);
-		} else {//»­Èý¶Î´úÌæÔ²½Ç¾ØÐÎ£¬¼ÈÔ²¡¢¾ØÐÎ¡¢Ô²
+		} else {//ç”»ä¸‰æ®µä»£æ›¿åœ†è§’çŸ©å½¢ï¼Œæ—¢åœ†ã€çŸ©å½¢ã€åœ†
 			RectF oval2 = new RectF(bottom / 2 + left, top, right - bottom / 2,
 					bottom);
 			canvas.drawCircle(oval2.left, bottom / 2, bottom / 2,
