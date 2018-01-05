@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F4F4F4"
+    android:orientation="vertical">
+
+    <GridLayout
+        android:id="@+id/grd_selected"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="#ffffff"
+        android:columnCount="3"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:rowCount="3" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="30dp"
+        android:layout_marginStart="10dp"
+        android:gravity="center"
+        android:text="点击添加更多栏目"
+        android:textColor="#666666"
+        android:textSize="14sp" />
+
+    <GridLayout
+        android:id="@+id/grd_unselected"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:columnCount="3"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:rowCount="3" />
+</LinearLayout>

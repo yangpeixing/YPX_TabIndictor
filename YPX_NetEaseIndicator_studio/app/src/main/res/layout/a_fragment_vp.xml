@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+    android:paddingTop="15dp">
+
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="-5dp"
+        android:layout_marginTop="5dp"
+        android:columnCount="2"
+        android:rowCount="5">
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/cb_isShowIndictor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="@string/tab_showOrHideIndicator"
+            android:textColor="#333333"
+            android:theme="@style/MyCheckBox" />
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/cb_tabSetting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            android:checked="true"
+            android:text="@string/tab_showOrHideTabSetting"
+            android:textColor="#333333"
+            android:theme="@style/MyCheckBox" />
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/cb_isShowDivider"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:checked="false"
+            android:text="显示/隐藏分割线"
+            android:textColor="#333333"
+            android:theme="@style/MyCheckBox" />
+
+        <android.support.v7.widget.AppCompatCheckBox
+            android:id="@+id/cb_grivate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            android:checked="false"
+            android:text="@string/tab_grivate"
+            android:textColor="#333333"
+            android:theme="@style/MyCheckBox" />
+
+    </GridLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"
+            android:gravity="center_vertical"
+            android:text="@string/tab_normal"
+            android:textColor="#333333" />
+
+        <android.support.v7.widget.AppCompatSeekBar
+            android:id="@+id/sb_normal"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:progress="40" />
+
+        <TextView
+            android:id="@+id/tv_normalTextSize"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/_14sp"
+            android:textColor="#333333"
+            android:textSize="12sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"
+            android:gravity="center_vertical"
+            android:text="@string/tab_selectSize"
+            android:textColor="#333333" />
+
+        <android.support.v7.widget.AppCompatSeekBar
+            android:id="@+id/sb_press"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:progress="20" />
+
+        <TextView
+            android:id="@+id/tv_pressTextSize"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/_16sp"
+            android:textColor="#333333"
+            android:textSize="12sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"
+            android:gravity="center_vertical"
+            android:text="单Tab左右间距"
+            android:textColor="#333333" />
+
+        <android.support.v7.widget.AppCompatSeekBar
+            android:id="@+id/sb_padding"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:progress="16" />
+
+        <TextView
+            android:id="@+id/tv_paddingSize"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/_10dp"
+            android:textColor="#333333"
+            android:textSize="12sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"
+            android:gravity="center_vertical"
+            android:text="整个Tab两边间距"
+            android:textColor="#333333" />
+
+        <android.support.v7.widget.AppCompatSeekBar
+            android:id="@+id/sb_holePadding"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:progress="16" />
+
+        <TextView
+            android:id="@+id/tv_holePadding"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/_10dp"
+            android:textColor="#333333"
+            android:textSize="12sp" />
+
+    </LinearLayout>
+
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:columnCount="2"
+        android:rowCount="5">
+
+        <LinearLayout
+            android:id="@+id/ll_tabPressColor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginTop="5dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:src="@mipmap/select" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/tab_selectedColor"
+                android:textColor="#333333"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_tabNormalColor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:layout_marginStart="25dp"
+            android:layout_marginTop="5dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:src="@mipmap/select" />
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/tab_unSelectedColor"
+                android:textColor="#333333"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_tabIndictorColor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:src="@mipmap/select" />
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/tab_indicatorColor"
+                android:textColor="#333333"
+                android:textSize="14sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_tabBackgroundColor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:layout_marginStart="25dp"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:src="@mipmap/select" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/tabBackground"
+                android:textColor="#333333"
+                android:textSize="14sp" />
+        </LinearLayout>
+    </GridLayout>
+
+    <Button
+        android:id="@+id/bt_style"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:background="@null"
+        android:drawableEnd="@mipmap/text_indicator"
+        android:drawablePadding="3dp"
+        android:text="@string/tab_indicatorStyle"
+        android:textColor="#333333" />
+
+    <Button
+        android:id="@+id/bt_tabWidth"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:background="@null"
+        android:drawableEnd="@mipmap/text_indicator"
+        android:drawablePadding="3dp"
+        android:text="自适应Tab宽度"
+        android:textColor="#333333" />
+
+    <LinearLayout
+        android:id="@+id/ll_tabWidth"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"
+            android:gravity="center_vertical"
+            android:text="Tab宽度"
+            android:textColor="#333333" />
+
+        <android.support.v7.widget.AppCompatSeekBar
+            android:id="@+id/sb_tabWidth"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:progress="16" />
+
+        <TextView
+            android:id="@+id/tv_tabWidth"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/_200dp"
+            android:textColor="#333333"
+            android:textSize="12sp" />
+
+    </LinearLayout>
+
+</LinearLayout>
+

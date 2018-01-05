@@ -41,27 +41,30 @@ import java.util.Comparator;
  * 解决了ViewPager预加载问题
  */
 public class YPXViewPager extends ViewGroup {
+    /**
+     * Indicates that the pager is in an idle, settled state. The current page
+     * is fully in view and no animation is in progress.
+     */
+    public static final int SCROLL_STATE_IDLE = 0;
+    /**
+     * Indicates that the pager is currently being dragged by the user.
+     */
+    public static final int SCROLL_STATE_DRAGGING = 1;
+    /**
+     * Indicates that the pager is in the process of settling to a final position.
+     */
+    public static final int SCROLL_STATE_SETTLING = 2;
     private static final String TAG = "LazyViewPager";
     private static final boolean DEBUG = false;
-
     private static final boolean USE_CACHE = false;
-
     private static final int DEFAULT_OFFSCREEN_PAGES = 0;//默认的加载页面,ViewPager是1个,所以会加载两个Fragment
     private static final int MAX_SETTLE_DURATION = 600; // ms
-
-    static class ItemInfo {
-        Object object;
-        int position;
-        boolean scrolling;
-    }
-
     private static final Comparator<ItemInfo> COMPARATOR = new Comparator<ItemInfo>() {
         @Override
         public int compare(ItemInfo lhs, ItemInfo rhs) {
             return lhs.position - rhs.position;
         }
     };
-
     private static final Interpolator sInterpolator = new Interpolator() {
         public float getInterpolation(float t) {
             // _o(t) = t * t * ((tension + 1) * t + tension)
@@ -70,9 +73,12 @@ public class YPXViewPager extends ViewGroup {
             return t * t * t + 1.0f;
         }
     };
-
+    /**
+     * Sentinel value for no current active pointer.
+     * Used by {@link #mActivePointerId}.
+     */
+    private static final int INVALID_POINTER = -1;
     private final ArrayList<ItemInfo> mItems = new ArrayList<ItemInfo>();
-
     private PagerAdapter mAdapter;
     private int mCurItem;   // Index of currently displayed page.
     private int mRestoredCurItem = -1;
@@ -80,20 +86,15 @@ public class YPXViewPager extends ViewGroup {
     private ClassLoader mRestoredClassLoader = null;
     private Scroller mScroller;
     private PagerObserver mObserver;
-
     private int mPageMargin;
     private Drawable mMarginDrawable;
-
     private int mChildWidthMeasureSpec;
     private int mChildHeightMeasureSpec;
     private boolean mInLayout;
-
     private boolean mScrollingCacheEnabled;
-
     private boolean mPopulatePending;
     private boolean mScrolling;
     private int mOffscreenPageLimit = DEFAULT_OFFSCREEN_PAGES;
-
     private boolean mIsBeingDragged;
     private boolean mIsUnableToDrag;
     private int mTouchSlop;
@@ -109,12 +110,6 @@ public class YPXViewPager extends ViewGroup {
      */
     private int mActivePointerId = INVALID_POINTER;
     /**
-     * Sentinel value for no current active pointer.
-     * Used by {@link #mActivePointerId}.
-     */
-    private static final int INVALID_POINTER = -1;
-
-    /**
      * Determines speed during touch scrolling
      */
     private VelocityTracker mVelocityTracker;
@@ -122,88 +117,13 @@ public class YPXViewPager extends ViewGroup {
     private int mMaximumVelocity;
     private float mBaseLineFlingVelocity;
     private float mFlingVelocityInfluence;
-
     private boolean mFakeDragging;
     private long mFakeDragBeginTime;
-
     private EdgeEffectCompat mLeftEdge;
     private EdgeEffectCompat mRightEdge;
-
     private boolean mFirstLayout = true;
-
     private OnPageChangeListener mOnPageChangeListener;
-
-    /**
-     * Indicates that the pager is in an idle, settled state. The current page
-     * is fully in view and no animation is in progress.
-     */
-    public static final int SCROLL_STATE_IDLE = 0;
-
-    /**
-     * Indicates that the pager is currently being dragged by the user.
-     */
-    public static final int SCROLL_STATE_DRAGGING = 1;
-
-    /**
-     * Indicates that the pager is in the process of settling to a final position.
-     */
-    public static final int SCROLL_STATE_SETTLING = 2;
-
     private int mScrollState = SCROLL_STATE_IDLE;
-
-    /**
-     * Callback interface for responding to changing state of the selected page.
-     */
-    public interface OnPageChangeListener {
-
-        /**
-         * This method will be invoked when the current page is scrolled, either as part
-         * of a programmatically initiated smooth scroll or a user initiated touch scroll.
-         *
-         * @param position             Position index of the first page currently being displayed.
-         *                             Page position+1 will be visible if positionOffset is nonzero.
-         * @param positionOffset       Value from [0, 1) indicating the offset from the page at position.
-         * @param positionOffsetPixels Value in pixels indicating the offset from position.
-         */
-        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels);
-
-        /**
-         * This method will be invoked when a new page becomes selected. Animation is not
-         * necessarily complete.
-         *
-         * @param position Position index of the new selected page.
-         */
-        public void onPageSelected(int position);
-
-        /**
-         * Called when the scroll state changes. Useful for discovering when the user
-         * begins dragging, when the pager is automatically settling to the current page,
-         * or when it is fully stopped/idle.
-         *
-         * @param state The new scroll state.
-         * @see android.support.v4.view.ViewPager#SCROLL_STATE_IDLE
-         * @see android.support.v4.view.ViewPager#SCROLL_STATE_DRAGGING
-         * @see android.support.v4.view.ViewPager#SCROLL_STATE_SETTLING
-         */
-        public void onPageScrollStateChanged(int state);
-    }
-
-    public static class SimpleOnPageChangeListener implements OnPageChangeListener {
-        @Override
-        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-            // This space for rent
-        }
-
-        @Override
-        public void onPageSelected(int position) {
-            // This space for rent
-        }
-
-        @Override
-        public void onPageScrollStateChanged(int state) {
-            // This space for rent
-        }
-    }
 
     public YPXViewPager(Context context) {
         super(context);
@@ -244,6 +164,10 @@ public class YPXViewPager extends ViewGroup {
         }
     }
 
+    public PagerAdapter getAdapter() {
+        return mAdapter;
+    }
+
     public void setAdapter(PagerAdapter adapter) {
         if (mAdapter != null) {
             mAdapter.unregisterDataSetObserver(mObserver);
@@ -279,22 +203,6 @@ public class YPXViewPager extends ViewGroup {
         }
     }
 
-    public PagerAdapter getAdapter() {
-        return mAdapter;
-    }
-
-    /**
-     * Set the currently selected page. If the ViewPager has already been through its first
-     * layout there will be a smooth animated transition between the current item and the
-     * specified item.
-     *
-     * @param item Item index to select
-     */
-    public void setCurrentItem(int item) {
-        mPopulatePending = false;
-        setCurrentItemInternal(item, !mFirstLayout, false);
-    }
-
     /**
      * Set the currently selected page.
      *
@@ -308,6 +216,18 @@ public class YPXViewPager extends ViewGroup {
 
     public int getCurrentItem() {
         return mCurItem;
+    }
+
+    /**
+     * Set the currently selected page. If the ViewPager has already been through its first
+     * layout there will be a smooth animated transition between the current item and the
+     * specified item.
+     *
+     * @param item Item index to select
+     */
+    public void setCurrentItem(int item) {
+        mPopulatePending = false;
+        setCurrentItemInternal(item, !mFirstLayout, false);
     }
 
     void setCurrentItemInternal(int item, boolean smoothScroll, boolean always) {
@@ -401,6 +321,15 @@ public class YPXViewPager extends ViewGroup {
     }
 
     /**
+     * Return the margin between pages.
+     *
+     * @return The size of the margin in pixels
+     */
+    public int getPageMargin() {
+        return mPageMargin;
+    }
+
+    /**
      * Set the margin between pages.
      *
      * @param marginPixels Distance between adjacent pages in pixels
@@ -416,15 +345,6 @@ public class YPXViewPager extends ViewGroup {
         recomputeScrollPosition(width, width, marginPixels, oldMargin);
 
         requestLayout();
-    }
-
-    /**
-     * Return the margin between pages.
-     *
-     * @return The size of the margin in pixels
-     */
-    public int getPageMargin() {
-        return mPageMargin;
     }
 
     /**
@@ -687,53 +607,6 @@ public class YPXViewPager extends ViewGroup {
                     }
                 }
             }
-        }
-    }
-
-    public static class SavedState extends BaseSavedState {
-        int position;
-        Parcelable adapterState;
-        ClassLoader loader;
-
-        public SavedState(Parcelable superState) {
-            super(superState);
-        }
-
-        @Override
-        public void writeToParcel(Parcel out, int flags) {
-            super.writeToParcel(out, flags);
-            out.writeInt(position);
-            out.writeParcelable(adapterState, flags);
-        }
-
-        @Override
-        public String toString() {
-            return "FragmentPager.SavedState{"
-                    + Integer.toHexString(System.identityHashCode(this))
-                    + " position=" + position + "}";
-        }
-
-        public static final Creator<SavedState> CREATOR
-                = ParcelableCompat.newCreator(new ParcelableCompatCreatorCallbacks<SavedState>() {
-            @Override
-            public SavedState createFromParcel(Parcel in, ClassLoader loader) {
-                return new SavedState(in, loader);
-            }
-
-            @Override
-            public SavedState[] newArray(int size) {
-                return new SavedState[size];
-            }
-        });
-
-        SavedState(Parcel in, ClassLoader loader) {
-            super(in);
-            if (loader == null) {
-                loader = getClass().getClassLoader();
-            }
-            position = in.readInt();
-            adapterState = in.readParcelable(loader);
-            this.loader = loader;
         }
     }
 
@@ -1701,6 +1574,112 @@ public class YPXViewPager extends ViewGroup {
         }
 
         return false;
+    }
+
+    /**
+     * Callback interface for responding to changing state of the selected page.
+     */
+    public interface OnPageChangeListener {
+
+        /**
+         * This method will be invoked when the current page is scrolled, either as part
+         * of a programmatically initiated smooth scroll or a user initiated touch scroll.
+         *
+         * @param position             Position index of the first page currently being displayed.
+         *                             Page position+1 will be visible if positionOffset is nonzero.
+         * @param positionOffset       Value from [0, 1) indicating the offset from the page at position.
+         * @param positionOffsetPixels Value in pixels indicating the offset from position.
+         */
+        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels);
+
+        /**
+         * This method will be invoked when a new page becomes selected. Animation is not
+         * necessarily complete.
+         *
+         * @param position Position index of the new selected page.
+         */
+        public void onPageSelected(int position);
+
+        /**
+         * Called when the scroll state changes. Useful for discovering when the user
+         * begins dragging, when the pager is automatically settling to the current page,
+         * or when it is fully stopped/idle.
+         *
+         * @param state The new scroll state.
+         * @see android.support.v4.view.ViewPager#SCROLL_STATE_IDLE
+         * @see android.support.v4.view.ViewPager#SCROLL_STATE_DRAGGING
+         * @see android.support.v4.view.ViewPager#SCROLL_STATE_SETTLING
+         */
+        public void onPageScrollStateChanged(int state);
+    }
+
+    static class ItemInfo {
+        Object object;
+        int position;
+        boolean scrolling;
+    }
+
+    public static class SimpleOnPageChangeListener implements OnPageChangeListener {
+        @Override
+        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            // This space for rent
+        }
+
+        @Override
+        public void onPageSelected(int position) {
+            // This space for rent
+        }
+
+        @Override
+        public void onPageScrollStateChanged(int state) {
+            // This space for rent
+        }
+    }
+
+    public static class SavedState extends BaseSavedState {
+        public static final Creator<SavedState> CREATOR
+                = ParcelableCompat.newCreator(new ParcelableCompatCreatorCallbacks<SavedState>() {
+            @Override
+            public SavedState createFromParcel(Parcel in, ClassLoader loader) {
+                return new SavedState(in, loader);
+            }
+
+            @Override
+            public SavedState[] newArray(int size) {
+                return new SavedState[size];
+            }
+        });
+        int position;
+        Parcelable adapterState;
+        ClassLoader loader;
+
+        public SavedState(Parcelable superState) {
+            super(superState);
+        }
+
+        SavedState(Parcel in, ClassLoader loader) {
+            super(in);
+            if (loader == null) {
+                loader = getClass().getClassLoader();
+            }
+            position = in.readInt();
+            adapterState = in.readParcelable(loader);
+            this.loader = loader;
+        }
+
+        @Override
+        public void writeToParcel(Parcel out, int flags) {
+            super.writeToParcel(out, flags);
+            out.writeInt(position);
+            out.writeParcelable(adapterState, flags);
+        }
+
+        @Override
+        public String toString() {
+            return "FragmentPager.SavedState{"
+                    + Integer.toHexString(System.identityHashCode(this))
+                    + " position=" + position + "}";
+        }
     }
 
     private class PagerObserver extends DataSetObserver {

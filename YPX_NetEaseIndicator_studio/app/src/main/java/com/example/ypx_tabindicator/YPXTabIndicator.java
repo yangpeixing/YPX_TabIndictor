@@ -13,6 +13,7 @@ import android.util.AttributeSet;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
@@ -55,9 +56,9 @@ public class YPXTabIndicator extends LinearLayout implements
      */
     private int indicatorColor = Color.RED;
     /**
-     * 背景和指示器半径，默认为40px
+     * 背景和指示器半径，默认无背景
      */
-    private int backgroundRadius = 40;
+    private int backgroundRadius = 0;
     /**
      * 记录tab宽度数组
      */
@@ -119,10 +120,6 @@ public class YPXTabIndicator extends LinearLayout implements
      */
     private boolean isDeuceTabWidth = false;
     /**
-     * 可见tab数量
-     */
-    private int visiableCounts = -1;
-    /**
      * 最大字体大小，默认为16
      */
     private int maxTabTextSize = 16;
@@ -141,11 +138,22 @@ public class YPXTabIndicator extends LinearLayout implements
 
     private int tabPaddingLeft = dp(10), tabPaddingRight = dp(10), tabPaddingTop = 0,
             tabPaddingBottom = 0;
+
+    /**
+     * Tab排版模式
+     */
+    private int tabGravity = Gravity.CENTER;
     /**
      * 对外的ViewPager的回调接口
      */
     private PageChangeListener onPageChangeListener;
     private TabClickListener tabClickListener;
+
+    private int tabLeftMargin = 0;
+    private int tabRightMargin = 0;
+
+    private int dividerTopAndBottomMargin = 0;
+    private int dividerColor = Color.parseColor("#999999");
 
     public YPXTabIndicator(Context context) {
         this(context, null);
@@ -161,7 +169,6 @@ public class YPXTabIndicator extends LinearLayout implements
         setOrientation(HORIZONTAL);
         setGravity(Gravity.CENTER);
         initView();
-
     }
 
     private void initView() {
@@ -173,25 +180,9 @@ public class YPXTabIndicator extends LinearLayout implements
         titles = new String[]{"tab1", "tab2", "tab3"};
         tabLengthArray = new int[titles.length];
         screenWidth = ScreenUtils.getScreenWidth(getContext());
-        setBackgroundShape();
         initPaints();
-        setTabViews();
-    }
-
-    /**
-     * 设置背景
-     */
-    private void setBackgroundShape() {
-        // 创建drawable
-        GradientDrawable gd = new GradientDrawable();
-        gd.setColor(backgroundColor);
-        gd.setCornerRadius(backgroundRadius);
-        gd.setStroke(strokeWidth, backgroundLineColor);
-        if (isShowBackground) {
-            setBackground(gd);
-        } else {
-            setBackgroundColor(backgroundColor);
-        }
+        setBackgroundShape();
+        refreshTabLayouts();
     }
 
     /**
@@ -205,62 +196,57 @@ public class YPXTabIndicator extends LinearLayout implements
     }
 
     /**
-     * 获取tab
+     * 设置圆角背景,可定制圆角和边框(大小和颜色)
      */
-    private void setTabViews() {
-        tabLengthArray = new int[titles.length];
+    private void setBackgroundShape() {
+        GradientDrawable gd = new GradientDrawable();
+        gd.setColor(backgroundColor);
+        gd.setCornerRadius(backgroundRadius);
+        gd.setStroke(strokeWidth, backgroundLineColor);
+        if (isShowBackground) {
+            setBackground(gd);
+        } else {
+            setBackgroundColor(backgroundColor);
+        }
+    }
+
+    /**
+     * 重置刷新所有Tab
+     */
+    private void refreshTabLayouts() {
         removeAllViews();
         for (int i = 0; i < titles.length; i++) {
-            addView(creatDefaultTab(titles[i], i));
+            addView(createDefaultTab(titles[i], i));
         }
-        calculateSize();
-        setItemClickEvent();
+        refreshCurrentTab();
     }
 
     /**
-     * 根据子textview是否平分宽度来测量可见数目
+     * 刷新选中Tab
      */
-    private void calculateSize() {
-        totalCount = titles.length;
-        if (isDeuceTabWidth) {// 如果平分tab宽度，则直接用屏幕宽除tab宽
-            visiableCounts = screenWidth / mTabWidth;
-        } else {// 如果不平分
-            visiableCounts = getDefaultVisiableCount();
+    public void refreshCurrentTab() {
+        resetTabColor();
+        resetTabSize();
+        getTab(mCurrentIndex).setTextColor(tabPressColor);
+        if (isShowTabSizeChange) {
+            getTab(mCurrentIndex).setTextSize(maxTabTextSize);
+        } else {
+            getTab(mCurrentIndex).setTextSize(tabTextSize);
         }
+        mTransitX = getTransitXByPosition(mCurrentIndex);
+        mTabWidth = tabLengthArray[mCurrentIndex];
+        int centerX = mTransitX - (screenWidth - mTabWidth) / 2 + tabLeftMargin;
+        parentScrollTo(centerX, 0);
+        invalidate();
     }
 
     /**
-     * 获取屏幕中显示的tab个数
-     */
-    private int getDefaultVisiableCount() {
-        int defaultNum = 0;
-        for (int i = 0; i < tabLengthArray.length; i++) {
-            defaultNum += tabLengthArray[i];
-            if (defaultNum >= screenWidth) {
-                return i;
-            }
-        }
-        return screenWidth / mTabWidth;
-    }
-
-    /**
-     * 获取position前几项tab宽度之和
-     */
-    private int getTransitXByPosition(int posotion) {
-        int defaultNum = 0;
-        for (int i = 0; i < posotion; i++) {
-            defaultNum += tabLengthArray[i];
-        }
-        return defaultNum;
-    }
-
-    /**
-     * 创建默认tab（Textview）
+     * 创建默认tab（TextView）
      *
      * @param string 要显示的文本
      * @param i      坐标
      */
-    private TextView creatDefaultTab(String string, int i) {
+    private TextView createDefaultTab(String string, final int i) {
         TextView textView = new TextView(getContext());
         textView.setGravity(Gravity.CENTER);
         textView.setTextColor(tabTextColor);
@@ -272,34 +258,90 @@ public class YPXTabIndicator extends LinearLayout implements
         if (isShowTabSizeChange) {//设置是否字体变换
             TextView dTextView = new TextView(getContext());
             dTextView.setTextSize(maxTabTextSize);
-            mTextPaint = dTextView.getPaint();//得到最大尺寸textview的Paint，用于测量宽度
+            mTextPaint = dTextView.getPaint();//得到最大尺寸textView的Paint，用于测量宽度
         } else {
             mTextPaint = textView.getPaint();
         }
         if (!isSetTabWidth) {
-            mTabWidth = (int) mTextPaint
-                    .measureText(isDeuceTabWidth ? getMaxLengthString(titles)
-                            : string)
+            mTabWidth = (int) mTextPaint.measureText(isDeuceTabWidth ? getMaxLengthString(titles) : string)
                     + tabPaddingLeft + tabPaddingRight;
         }
         tabLengthArray[i] = mTabWidth;
-        textView.setLayoutParams(new LayoutParams(mTabWidth,
-                defaultHeight + tabPaddingBottom + tabPaddingTop));
-        return textView;
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(mTabWidth, defaultHeight + tabPaddingBottom + tabPaddingTop);
+        if (i == 0) {
+            params.leftMargin = tabLeftMargin;
+        }
 
+        if (i == totalCount - 1) {
+            params.rightMargin = tabRightMargin;
+        }
+        textView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isClick = true;
+                setCurrentIndex(i);
+                if (tabClickListener != null) {
+                    tabClickListener.onClick((TextView) v, i);
+                }
+            }
+        });
+        textView.setLayoutParams(params);
+        return textView;
     }
 
-    public void setShowTabDivider(boolean showTabDivider) {
-        isShowTabDivider = showTabDivider;
+    /**
+     * 设置整个指示器左边距和右边距，即第一个tab的左边距和最后一个tab的右边距
+     * 如果当前tab布局排版模式为居中，则设置左右间距无效
+     *
+     * @param tabLeftMargin  左边距
+     * @param tabRightMargin 右边距
+     */
+    public void setTabLeftAndRightMargin(int tabLeftMargin, int tabRightMargin) {
+        if (tabGravity == Gravity.CENTER) {
+            return;
+        }
+        this.tabLeftMargin = tabLeftMargin;
+        this.tabRightMargin = tabRightMargin;
+
+        LinearLayout.LayoutParams pa = (LinearLayout.LayoutParams) getTab(0).getLayoutParams();
+        pa.leftMargin = tabLeftMargin;
+        getTab(0).setLayoutParams(pa);
+
+        LinearLayout.LayoutParams pa2 = (LinearLayout.LayoutParams) getTab(getChildCount() - 1).getLayoutParams();
+        pa2.rightMargin = tabRightMargin;
+        getTab(getChildCount() - 1).setLayoutParams(pa2);
+    }
+
+
+    /**
+     * 获取position前几项tab宽度之和
+     *
+     * @param position 索引
+     */
+    private int getTransitXByPosition(int position) {
+        int defaultNum = 0;
+        for (int i = 0; i < position; i++) {
+            defaultNum += tabLengthArray[i];
+        }
+        return defaultNum;
+    }
+
+    /**
+     * 显示tab分割线
+     *
+     * @param isShowTabDivider          显示tab分割线
+     * @param dividerTopAndBottomMargin tab分割线上下间距
+     */
+    public void setShowTabDivider(boolean isShowTabDivider, int dividerTopAndBottomMargin, int dividerColor) {
+        this.isShowTabDivider = isShowTabDivider;
+        this.dividerTopAndBottomMargin = dividerTopAndBottomMargin;
+        this.dividerColor = dividerColor;
         invalidate();
     }
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
         defaultHeight = getMeasuredHeight();
-        if (isShowTabDivider) {
-            drawDivider(canvas);
-        }
         if (mCurrentIndex == 0) {
             mTabWidth = tabLengthArray[0];
         }
@@ -307,48 +349,48 @@ public class YPXTabIndicator extends LinearLayout implements
         int right = mTabWidth + left;// 整个tab的位置
         int top = 0;// tab距离顶端的位置
         int bottom = defaultHeight;// 整个tab的高度
+
+        if (isShowTabDivider) {
+            drawDivider(canvas);
+        }
+
         if (isShowIndicator) {
             if (creator != null) {
                 creator.drawIndicator(canvas, left, top, right, bottom,
                         indicatorPaint, backgroundRadius);
             } else {
-//                drawIndicatorWithTransitX(canvas, left, top, right, bottom,
-//                        indicatorPaint);
-                drawUnderLineIndicatorWithTransitX(canvas, left, top, right, bottom,
-                        indicatorPaint);
+                drawUnderLineIndicatorWithTransitX(canvas, left, top, right, bottom, indicatorPaint);
             }
         }
         if (mInitIndex != 0) {
             (getTab(mInitIndex)).setTextColor(backgroundColor);
             int centerX = getTransitXByPosition(mInitIndex)
                     - (screenWidth - tabLengthArray[mInitIndex]) / 2;
-            parentScrollto(centerX, 0);
+            parentScrollTo(centerX, 0);
         }
         mInitIndex = 0;// 清除第一次默认index
         super.dispatchDraw(canvas);
     }
 
-    private void drawDivider(Canvas canvas) {
-        if (mLinePaint == null) {
-            initLinePaint();
-        }
-        for (int i = 1; i < titles.length; i++) {
-            float x = (mTabWidth) * i;
-            float y = dp(0);
-            float endx = mTabWidth * i;
-            float endy = getMeasuredHeight() - ScreenUtils.dp2px(getContext(), 0);
-            canvas.drawLines(new float[]{x, y, endx, endy}, mLinePaint);
-        }
-    }
 
     /**
-     * 初始化分割线画笔
+     * 画分割线
+     *
+     * @param canvas 画布
      */
-    private void initLinePaint() {
-        mLinePaint = new Paint();
-        mLinePaint.setColor(Color.parseColor("#e8e8e8"));
-        mLinePaint.setStrokeWidth(1);
-        mLinePaint.setAntiAlias(true);
+    private void drawDivider(Canvas canvas) {
+        if (mLinePaint == null) {
+            mLinePaint = new Paint();
+            mLinePaint.setColor(dividerColor);
+            mLinePaint.setStrokeWidth(1);
+            mLinePaint.setAntiAlias(true);
+        }
+        for (int i = 1; i < totalCount; i++) {
+            float x = (getTransitXByPosition(i) + tabLeftMargin) * 1.0f;
+            float y = dividerTopAndBottomMargin;
+            float endY = defaultHeight * 1.0f - dividerTopAndBottomMargin;
+            canvas.drawLines(new float[]{x, y, x, endY}, mLinePaint);
+        }
     }
 
     /**
@@ -382,23 +424,21 @@ public class YPXTabIndicator extends LinearLayout implements
         this.viewPager = viewPager;
         this.mCurrentIndex = index;
         mInitIndex = index;
-        setItemClickEvent();
         isChildOfHorizontalScrollView = (getParent() != null
                 && (getParent() instanceof HorizontalScrollView));
 
         viewPager.addOnPageChangeListener(this);
-        setmCurrentIndex(index);
+        setCurrentIndex(index);
     }
 
     public void setViewPager(YPXViewPager viewPager, int index) {
         this.ypxViewPager = viewPager;
         this.mCurrentIndex = index;
         mInitIndex = index;
-        setItemClickEvent();
         isChildOfHorizontalScrollView = (getParent() != null
                 && (getParent() instanceof HorizontalScrollView));
         ypxViewPager.setOnPageChangeListener(this);
-        setmCurrentIndex(index);
+        setCurrentIndex(index);
 
     }
 
@@ -408,7 +448,7 @@ public class YPXTabIndicator extends LinearLayout implements
      * @param x x
      * @param y y
      */
-    public void parentScrollto(int x, int y) {
+    public void parentScrollTo(int x, int y) {
         if (isChildOfHorizontalScrollView) {
             ((HorizontalScrollView) getParent()).smoothScrollTo(x, y);
         }
@@ -435,25 +475,6 @@ public class YPXTabIndicator extends LinearLayout implements
     protected void setTabSizeChange(int position, float positionOffset) {
         getTab(position).setTextSize(
                 blendSize(tabTextSize, maxTabTextSize, positionOffset));
-    }
-
-    /**
-     * 设置点击事件
-     */
-    public void setItemClickEvent() {
-        for (int i = 0; i < totalCount; i++) {
-            final int j = i;
-            getTab(i).setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    isClick = true;
-                    setmCurrentIndex(j);
-                    if (tabClickListener != null) {
-                        tabClickListener.onClick((TextView) v, j);
-                    }
-                }
-            });
-        }
     }
 
     /**
@@ -487,34 +508,60 @@ public class YPXTabIndicator extends LinearLayout implements
         return Color.rgb((int) r, (int) g, (int) b);
     }
 
-    public String[] getTitles() {
-        return titles;
+    /**
+     * 设置Tab的排版模式，比如居中和居左(相对父布局)
+     * 如果可以横向滑动，则限定居左加载(已限定死，外部无法更改)
+     * 如果不能横向滑动，则根据用户传入参数决定排版，默认居中
+     *
+     * @param tabGravity 排版模式，只针对tab数量不足一屏时生效
+     */
+    public void setTabLayoutGravity(int tabGravity) {
+        this.tabGravity = tabGravity;
+        FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) this.getLayoutParams();
+        if (params == null) {
+            return;
+        }
+        if (isChildOfHorizontalScrollView) {
+            if (parentCanScroll()) {
+                params.gravity = Gravity.START | Gravity.CENTER;
+            } else {
+                params.gravity = tabGravity;
+            }
+        } else {
+            params.gravity = tabGravity;
+        }
+        setLayoutParams(params);
     }
 
     /**
-     * 设置指示器内容,默认tab1，tab2，tab3
+     * 检测父布局是否可以滑动，换句话说，用来检测当前tab数目是否大于屏幕宽度或父布局宽度
      *
-     * @param titles 设置标题数组
+     * @return 是否大于
      */
-    public void setTitles(String[] titles) {
-        if (titles != null && titles.length > 0) {
-            this.titles = titles;
-            setTabViews();
-            setItemClickEvent();
-            setCanScrollPamas(titles.length > getVisiableCounts());
+    private boolean parentCanScroll() {
+        int parentWidth = ((ViewGroup) getParent()).getMeasuredWidth();
+        if (isDeuceTabWidth) {
+            return parentWidth == 0 ? mTabWidth * totalCount > screenWidth
+                    : mTabWidth * totalCount > parentWidth;
         }
+        int totalWidth = tabLeftMargin + tabRightMargin;
+        for (int i = 0; i < totalCount; i++) {
+            totalWidth += tabLengthArray[i];
+            if ((parentWidth != 0 && totalWidth > parentWidth) || totalWidth >= screenWidth) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    private void setCanScrollPamas(boolean isCanScroll) {
-        if (isChildOfHorizontalScrollView) {
-            FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) this.getLayoutParams();
-            if (isCanScroll) {
-                params.gravity = Gravity.LEFT;
-            } else {
-                params.gravity = Gravity.CENTER;
-            }
-            this.setLayoutParams(params);
-        }
+    /**
+     * 设置外框宽度，默认为0px
+     *
+     * @param strokeWidth 背景边框宽度
+     */
+    public void setBackgroundStrokeWidth(int strokeWidth) {
+        this.strokeWidth = strokeWidth;
+        setBackgroundShape();
     }
 
     public ViewPager getViewPager() {
@@ -536,31 +583,30 @@ public class YPXTabIndicator extends LinearLayout implements
      */
     public void setDefaultHeight(int defaultHeight) {
         this.defaultHeight = defaultHeight;
-        setTabViews();
-    }
-
-    /**
-     * 设置tab大小，默认大小为14
-     *
-     * @param tabTextSize 正常尺寸
-     */
-    public void setTabTextSize(int tabTextSize) {
-        this.tabTextSize = tabTextSize;
-        resetTabSize();
+        refreshTabLayouts();
     }
 
     public int getStrokeWidth() {
         return strokeWidth;
     }
 
+    public String[] getTitles() {
+        return titles;
+    }
+
     /**
-     * 设置外框宽度，默认为0px
+     * 设置指示器内容,默认tab1，tab2，tab3
      *
-     * @param strokeWidth 背景边框宽度
+     * @param titles 设置标题数组
      */
-    public void setBackgroundStrokeWidth(int strokeWidth) {
-        this.strokeWidth = strokeWidth;
-        setBackgroundShape();
+    public void setTitles(String[] titles) {
+        if (titles != null && titles.length > 0) {
+            this.titles = titles;
+            totalCount = titles.length;
+            tabLengthArray = new int[totalCount];
+            refreshTabLayouts();
+            setTabLayoutGravity(tabGravity);
+        }
     }
 
     /**
@@ -609,6 +655,7 @@ public class YPXTabIndicator extends LinearLayout implements
         for (int i = 0; i < totalCount; i++) {
             getTab(i).setTextColor(tabTextColor);
         }
+        refreshCurrentTab();
     }
 
     public int getmBackgroundColor() {
@@ -654,7 +701,7 @@ public class YPXTabIndicator extends LinearLayout implements
      *
      * @return 获取当前选中项
      */
-    public int getmCurrentIndex() {
+    public int getCurrentIndex() {
         return mCurrentIndex;
     }
 
@@ -663,7 +710,7 @@ public class YPXTabIndicator extends LinearLayout implements
      *
      * @param mCurrentIndex 默认
      */
-    public void setmCurrentIndex(final int mCurrentIndex) {
+    public void setCurrentIndex(final int mCurrentIndex) {
         this.mCurrentIndex = mCurrentIndex;
         if (ypxViewPager != null && ypxViewPager.getAdapter() != null) {
             ypxViewPager.setCurrentItem(mCurrentIndex, true);
@@ -676,7 +723,7 @@ public class YPXTabIndicator extends LinearLayout implements
         postDelayed(new Runnable() {
             @Override
             public void run() {
-                pressTab(mCurrentIndex);
+                refreshCurrentTab();
             }
         }, 50);
     }
@@ -731,12 +778,10 @@ public class YPXTabIndicator extends LinearLayout implements
      */
     public void setTabMaxTextSize(int maxTabTextSize) {
         this.maxTabTextSize = maxTabTextSize;
-        setTabViews();
+        refreshTabLayouts();
+        refreshCurrentTab();
     }
 
-    public int getVisiableCounts() {
-        return visiableCounts;
-    }
 
     public int getTabWidth() {
         return mTabWidth;
@@ -750,12 +795,16 @@ public class YPXTabIndicator extends LinearLayout implements
     public void setTabWidth(int mTabWidth) {
         if (mTabWidth < 0) {
             this.isSetTabWidth = false;
-            setTabViews();
+            refreshTabLayouts();
             return;
         }
         this.mTabWidth = mTabWidth;
         this.isSetTabWidth = true;
-        setTabViews();
+        refreshTabLayouts();
+    }
+
+    public int getMaxTabTextSize() {
+        return maxTabTextSize;
     }
 
     /**
@@ -778,6 +827,21 @@ public class YPXTabIndicator extends LinearLayout implements
      */
     public void setTabPressColor(int tabPressColor) {
         this.tabPressColor = tabPressColor;
+        refreshCurrentTab();
+    }
+
+    public int getTabTextSize() {
+        return tabTextSize;
+    }
+
+    /**
+     * 设置tab大小，默认大小为14
+     *
+     * @param tabTextSize 正常尺寸
+     */
+    public void setTabTextSize(int tabTextSize) {
+        this.tabTextSize = tabTextSize;
+        resetTabSize();
     }
 
     /**
@@ -793,7 +857,21 @@ public class YPXTabIndicator extends LinearLayout implements
         this.tabPaddingRight = r;
         this.tabPaddingTop = t;
         this.tabPaddingBottom = b;
-        setTabViews();
+        refreshTabLayouts();
+    }
+
+    /**
+     * 设置指定tab的边距
+     *
+     * @param position 要设置的tab索引
+     * @param l        左
+     * @param t        上
+     * @param r        右
+     * @param b        下
+     */
+    public void setTabPaddingWithPosition(int position, int l, int t, int r, int b) {
+        getTab(position).setPadding(l, t, r, b);
+        refreshTabLayouts();
     }
 
     public boolean isDeuceTabWidth() {
@@ -807,7 +885,8 @@ public class YPXTabIndicator extends LinearLayout implements
      */
     public void setDeuceTabWidth(boolean isDeuceTabWidth) {
         this.isDeuceTabWidth = isDeuceTabWidth;
-        setTabViews();
+        refreshTabLayouts();
+        refreshCurrentTab();
     }
 
     /**
@@ -825,13 +904,6 @@ public class YPXTabIndicator extends LinearLayout implements
         return max;
     }
 
-    /**
-     * 重置数值
-     */
-    public void resetData() {
-        initView();
-
-    }
 
     /**
      * 设置指示器样式，默认为下划线样式，可定制成网易样式
@@ -876,15 +948,8 @@ public class YPXTabIndicator extends LinearLayout implements
         if (isClick || position + 1 >= totalCount) {
             return;
         }
-
-        if (position > visiableCounts / 2 - 1) {
-            int centerX = (int) ((getTransitXByPosition(position)) - (screenWidth - tabLengthArray[position]) / 2
-                    + tabLengthArray[position] * positionOffset);
-           // int centerX = getTransitXByPosition(position);
-            parentScrollto(centerX, 0);
-        } else {
-            parentScrollto(0, 0);
-        }
+        int transitX = getTransitXByPosition(position);
+        int tabWidth = tabLengthArray[position];
 
         if (isShowTabSizeChange) {// 判断是否变换
             setTabSizeChange(position, 1 - positionOffset);
@@ -893,17 +958,19 @@ public class YPXTabIndicator extends LinearLayout implements
         setTabColorChange(position, 1 - positionOffset);
         setTabColorChange(position + 1, positionOffset);
 
-        if (positionOffset != 0.0) {
-            mTransitX = (int) (tabLengthArray[position] * positionOffset + (getTransitXByPosition(position)));
-            mTabWidth = (int) (tabLengthArray[position] + (tabLengthArray[position + 1] - tabLengthArray[position])
-                    * positionOffset);
+        mTransitX = (int) (tabWidth * positionOffset + transitX);
+        mTabWidth = (int) (tabWidth + (tabLengthArray[position + 1] - tabWidth) * positionOffset);
+        invalidate();
+
+        if (positionOffset != 0.0f) {
+            int centerX = (mTransitX - (screenWidth - mTabWidth) / 2) + tabLeftMargin;
+            parentScrollTo(centerX, 0);
         }
 
-        invalidate();
         if (onPageChangeListener != null) { // 回调
-            onPageChangeListener.onPageScrolled(position, positionOffset,
-                    positionOffsetPixels);
+            onPageChangeListener.onPageScrolled(position, positionOffset, positionOffsetPixels);
         }
+
     }
 
     @Override
@@ -914,19 +981,6 @@ public class YPXTabIndicator extends LinearLayout implements
         }
     }
 
-    public void pressTab(int index) {
-        resetTabColor();
-        resetTabSize();
-        getTab(index).setTextColor(tabPressColor);
-        if (isShowTabSizeChange) {
-            getTab(index).setTextSize(maxTabTextSize);
-        } else {
-            getTab(index).setTextSize(tabTextSize);
-        }
-        mTransitX = getTransitXByPosition(index);
-        mTabWidth = tabLengthArray[index];
-        invalidate();
-    }
 
     /**
      * 下划线指示器
@@ -956,7 +1010,7 @@ public class YPXTabIndicator extends LinearLayout implements
      *
      * @author yangpeixing
      */
-    public interface DrawIndicatorCreator {
+    interface DrawIndicatorCreator {
         /**
          * 默认为圆角矩形指示器，用户可继承重写自定义指示器样式
          *
@@ -978,7 +1032,7 @@ public class YPXTabIndicator extends LinearLayout implements
      *
      * @author yangpeixing
      */
-    public interface PageChangeListener {
+    interface PageChangeListener {
         void onPageScrolled(int position, float positionOffset,
                             int positionOffsetPixels);
 
@@ -992,7 +1046,7 @@ public class YPXTabIndicator extends LinearLayout implements
      *
      * @author yangpeixing
      */
-    public interface TabClickListener {
+    interface TabClickListener {
         void onClick(TextView tab, int position);
     }
 

@@ -1,3 +1,19 @@
 <resources>
-    <string name="app_name">YPX_NetEaseIndicator</string>
+    <string name="app_name">YPX_TabIndicator</string>
+    <string name="tab_normal">Tab正常字体</string>
+    <string name="_14sp">14sp</string>
+    <string name="tab_selectSize">Tab选中字体</string>
+    <string name="_16sp">16sp</string>
+    <string name="_60dp">60dp</string>
+    <string name="_10dp">10dp</string>
+    <string name="_200dp">200dp</string>
+    <string name="tab_selectedColor">Tab已选中颜色</string>
+    <string name="tab_unSelectedColor">Tab未选中颜色</string>
+    <string name="tab_indicatorColor">TAB指示器颜色</string>
+    <string name="tabBackground">TAB整个背景色</string>
+    <string name="tab_isDeuce">是否平分Tab宽度</string>
+    <string name="tab_showOrHideIndicator">显示/隐藏指示器</string>
+    <string name="tab_showOrHideTabSetting">显示/隐藏Tab管理</string>
+    <string name="tab_grivate">居中/左对齐Tab</string>
+    <string name="tab_indicatorStyle">指示器样式选择</string>
 </resources>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="styleArray">
+        <item>下划线样式</item>
+        <item>圆球样式</item>
+        <item>三角样式</item>
+        <item>其他样式</item>
+    </string-array>
+
+    <string-array name="tabWidthArray">
+        <item>自适应Tab宽度</item>
+        <item>Tab以最大宽度平分</item>
+        <item>Tab以屏宽百分比平分</item>
+        <item>手动指定Tab宽度</item>
+    </string-array>
+</resources>
