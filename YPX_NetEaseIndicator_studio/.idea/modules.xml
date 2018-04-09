@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/YPX_NetEaseIndicator_studio.iml" filepath="$PROJECT_DIR$/YPX_NetEaseIndicator_studio.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/tablayout/tablayout.iml" filepath="$PROJECT_DIR$/tablayout/tablayout.iml" />
     </modules>
   </component>
 </project>

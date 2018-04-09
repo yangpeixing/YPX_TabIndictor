@@ -23,6 +23,8 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.ypx.tablayout.YPXTabLayout;
+
 public class SimpleFragment extends Fragment implements View.OnClickListener, CompoundButton.OnCheckedChangeListener, SeekBar.OnSeekBarChangeListener {
     public static final String BUNDLE_TITLE = "title";
     View view;
@@ -30,10 +32,10 @@ public class SimpleFragment extends Fragment implements View.OnClickListener, Co
     TextView tv_pressTextSize, tv_normalTextSize, tv_paddingSize, tv_holePadding;
     LinearLayout ll_tabPressColor, ll_tabNormalColor, ll_tabIndicatorColor, ll_tabBackgroundColor;
     Button bt_style, bt_tabWidth;
-    AppCompatCheckBox cb_isShowIndicator, cb_gravity, cb_tabSetting;
+    AppCompatCheckBox cb_isShowIndicator, cb_gravity, cb_tabSetting, cb_isShowDivider;
     LinearLayout ll_tabWidth;
     int normalSize = 14;
-    YPXTabIndicator indicator;
+    YPXTabLayout indicator;
     MainActivity mainActivity;
     private String mTitle = "title";
 
@@ -73,13 +75,15 @@ public class SimpleFragment extends Fragment implements View.OnClickListener, Co
                 ll_tabIndicatorColor = (LinearLayout) view.findViewById(R.id.ll_tabIndictorColor);
                 ll_tabBackgroundColor = (LinearLayout) view.findViewById(R.id.ll_tabBackgroundColor);
                 bt_tabWidth = (Button) view.findViewById(R.id.bt_tabWidth);
+                cb_isShowDivider = (AppCompatCheckBox) view.findViewById(R.id.cb_isShowDivider);
                 cb_isShowIndicator = (AppCompatCheckBox) view.findViewById(R.id.cb_isShowIndictor);
-                cb_gravity = (AppCompatCheckBox) view.findViewById(R.id.cb_grivate);
+                cb_gravity = (AppCompatCheckBox) view.findViewById(R.id.cb_gravity);
                 cb_tabSetting = (AppCompatCheckBox) view.findViewById(R.id.cb_tabSetting);
                 bt_style = (Button) view.findViewById(R.id.bt_style);
                 ll_tabWidth = (LinearLayout) view.findViewById(R.id.ll_tabWidth);
                 indicator = mainActivity.getIndicator();
                 initListener();
+                refreshUI();
             }
             return view;
         } else {
@@ -103,6 +107,7 @@ public class SimpleFragment extends Fragment implements View.OnClickListener, Co
         int pressSize = indicator.getMaxTabTextSize();
         sb_normal.setProgress((normalSize - 10) * 10);
         sb_press.setProgress((pressSize - normalSize) * 10);
+        
         cb_isShowIndicator.setChecked(indicator.isShowIndicator());
         ((ImageView) ll_tabNormalColor.getChildAt(0)).setColorFilter(indicator.getTabTextColor());
         ((ImageView) ll_tabPressColor.getChildAt(0)).setColorFilter(indicator.getTabPressColor());
@@ -120,6 +125,7 @@ public class SimpleFragment extends Fragment implements View.OnClickListener, Co
         cb_gravity.setOnCheckedChangeListener(this);
         cb_isShowIndicator.setOnCheckedChangeListener(this);
         cb_tabSetting.setOnCheckedChangeListener(this);
+        cb_isShowDivider.setOnCheckedChangeListener(this);
         sb_normal.setOnSeekBarChangeListener(this);
         sb_press.setOnSeekBarChangeListener(this);
         sb_padding.setOnSeekBarChangeListener(this);
@@ -165,6 +171,8 @@ public class SimpleFragment extends Fragment implements View.OnClickListener, Co
             indicator.setTabLayoutGravity(isChecked ? Gravity.CENTER : Gravity.START | Gravity.CENTER);
         } else if (buttonView == cb_tabSetting) {
             mainActivity.hideTabSettingIcon(!isChecked);
+        } else if (buttonView == cb_isShowDivider) {
+            indicator.setShowTabDivider(isChecked, 0, 0);
         }
     }
 
@@ -216,7 +224,7 @@ public class SimpleFragment extends Fragment implements View.OnClickListener, Co
                 indicator.setTabTextColor(Color.parseColor("#666666"));
                 indicator.setDefaultHeight(dp(44));
                 indicator.setmBackgroundColor(Color.WHITE);
-                indicator.setDrawIndicatorCreator(new YPXTabIndicator.DrawIndicatorCreator() {
+                indicator.setDrawIndicatorCreator(new YPXTabLayout.DrawIndicatorCreator() {
                     @Override
                     public void drawIndicator(Canvas canvas, int left, int top, int right, int bottom, Paint paint, int raduis) {
                         RectF oval = new RectF(left, bottom - dp(3), right, bottom);
@@ -233,7 +241,7 @@ public class SimpleFragment extends Fragment implements View.OnClickListener, Co
                 indicator.setIndicatorColor(Color.WHITE);
                 indicator.setTabTextColor(Color.WHITE);
                 indicator.setDefaultHeight(dp(30));
-                indicator.setDrawIndicatorCreator(new YPXTabIndicator.DrawIndicatorCreator() {
+                indicator.setDrawIndicatorCreator(new YPXTabLayout.DrawIndicatorCreator() {
                     @Override
                     public void drawIndicator(Canvas canvas, int left, int top, int right, int bottom, Paint paint, int raduis) {
                         RectF oval2 = new RectF(bottom / 2 + left, top, right - bottom / 2, bottom);
@@ -246,7 +254,7 @@ public class SimpleFragment extends Fragment implements View.OnClickListener, Co
             case 2:
                 mainActivity.setHs_indicatorHeight(dp(44));
                 indicator.setDefaultHeight(dp(44));
-                indicator.setDrawIndicatorCreator(new YPXTabIndicator.DrawIndicatorCreator() {
+                indicator.setDrawIndicatorCreator(new YPXTabLayout.DrawIndicatorCreator() {
                     @Override
                     public void drawIndicator(Canvas canvas, int left, int top, int right, int bottom, Paint paint, int raduis) {
                         Path mPath = new Path();

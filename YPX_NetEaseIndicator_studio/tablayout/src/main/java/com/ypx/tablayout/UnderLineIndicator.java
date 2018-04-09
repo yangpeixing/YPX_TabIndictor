@@ -1,7 +1,7 @@
 /**
  *
  */
-package com.example.ypx_tabindicator;
+package com.ypx.tablayout;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -13,7 +13,7 @@ import android.util.AttributeSet;
  * @author yangpeixing
  *
  */
-public class UnderLineIndicator extends YPXTabIndicator {
+public class UnderLineIndicator extends YPXTabLayout {
 
 	/**
 	 * @param context

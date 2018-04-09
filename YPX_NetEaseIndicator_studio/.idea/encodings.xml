@@ -2,8 +2,8 @@
 <project version="4">
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/app/src/main/java/com/example/ypx_tabindicator/ScreenUtils.java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/app/src/main/java/com/example/ypx_tabindicator/UnderLineIndicator.java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/app/src/main/java/com/example/ypx_tabindicator/YPXTabIndicator.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/tablayout/src/main/java/com/ypx/tablayout/UnderLineIndicator.java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/tablayout/src/main/java/com/ypx/tablayout/YPXTabLayout.java" charset="UTF-8" />
     <file url="PROJECT" charset="UTF-8" />
   </component>
 </project>

@@ -46,7 +46,7 @@
             android:overScrollMode="never"
             android:scrollbars="none">
 
-            <com.example.ypx_tabindicator.YPXTabIndicator
+            <com.ypx.tablayout.YPXTabLayout
                 android:id="@+id/indicator"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />

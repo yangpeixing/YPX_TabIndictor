@@ -1,4 +1,4 @@
-package com.example.ypx_tabindicator;
+package com.ypx.tablayout;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -10,10 +10,12 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.text.TextPaint;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
@@ -27,7 +29,7 @@ import android.widget.TextView;
  * @author yangpeixing
  */
 @SuppressWarnings("unused")
-public class YPXTabIndicator extends LinearLayout implements
+public class YPXTabLayout extends LinearLayout implements
         OnPageChangeListener, YPXViewPager.OnPageChangeListener {
     private Paint mLinePaint;
     /**
@@ -155,21 +157,34 @@ public class YPXTabIndicator extends LinearLayout implements
     private int dividerTopAndBottomMargin = 0;
     private int dividerColor = Color.parseColor("#999999");
 
-    public YPXTabIndicator(Context context) {
+    public YPXTabLayout(Context context) {
         this(context, null);
     }
 
-    public YPXTabIndicator(Context context, AttributeSet attrs) {
+    public YPXTabLayout(Context context, AttributeSet attrs) {
         this(context, attrs, 0);
     }
 
-    public YPXTabIndicator(Context context, AttributeSet attrs,
-                           int defStyleAttr) {
+    public YPXTabLayout(Context context, AttributeSet attrs,
+                        int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         setOrientation(HORIZONTAL);
         setGravity(Gravity.CENTER);
         initView();
     }
+
+    /**
+     * 获得屏幕宽度
+     */
+    public static int getScreenWidth(Context context) {
+        WindowManager wm = (WindowManager) context
+                .getSystemService(Context.WINDOW_SERVICE);
+        DisplayMetrics outMetrics = new DisplayMetrics();
+        assert wm != null;
+        wm.getDefaultDisplay().getMetrics(outMetrics);
+        return outMetrics.widthPixels;
+    }
+
 
     private void initView() {
         mCurrentIndex = 0;
@@ -179,7 +194,7 @@ public class YPXTabIndicator extends LinearLayout implements
         defaultHeight = dp(44);
         titles = new String[]{"tab1", "tab2", "tab3"};
         tabLengthArray = new int[titles.length];
-        screenWidth = ScreenUtils.getScreenWidth(getContext());
+        screenWidth = getScreenWidth(getContext());
         initPaints();
         setBackgroundShape();
         refreshTabLayouts();
@@ -331,21 +346,21 @@ public class YPXTabIndicator extends LinearLayout implements
      *
      * @param isShowTabDivider          显示tab分割线
      * @param dividerTopAndBottomMargin tab分割线上下间距
+     * @param dividerColor              tab分割线颜色，传0则显示默认颜色
      */
     public void setShowTabDivider(boolean isShowTabDivider, int dividerTopAndBottomMargin, int dividerColor) {
+        if (dividerColor != 0) {
+            this.dividerColor = dividerColor;
+        }
         this.isShowTabDivider = isShowTabDivider;
         this.dividerTopAndBottomMargin = dividerTopAndBottomMargin;
-        this.dividerColor = dividerColor;
         invalidate();
     }
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
         defaultHeight = getMeasuredHeight();
-        if (mCurrentIndex == 0) {
-            mTabWidth = tabLengthArray[0];
-        }
-        int left = mTransitX + mInitIndex * mTabWidth + getTab(0).getLeft();// tab左边距离原点的位置
+        int left = mTransitX + getTab(0).getLeft();// tab左边距离原点的位置
         int right = mTabWidth + left;// 整个tab的位置
         int top = 0;// tab距离顶端的位置
         int bottom = defaultHeight;// 整个tab的高度
@@ -473,6 +488,9 @@ public class YPXTabIndicator extends LinearLayout implements
      * @param positionOffset 变化因子
      */
     protected void setTabSizeChange(int position, float positionOffset) {
+//        float scale = (maxTabTextSize * 1.00f / (tabTextSize * 1.00f)) * (1 - positionOffset);
+//        ViewHelper.setScaleX(getTab(position), scale);
+//        ViewHelper.setScaleY(getTab(position), scale);
         getTab(position).setTextSize(
                 blendSize(tabTextSize, maxTabTextSize, positionOffset));
     }
@@ -517,20 +535,31 @@ public class YPXTabIndicator extends LinearLayout implements
      */
     public void setTabLayoutGravity(int tabGravity) {
         this.tabGravity = tabGravity;
-        FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) this.getLayoutParams();
-        if (params == null) {
-            return;
-        }
         if (isChildOfHorizontalScrollView) {
+            FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) this.getLayoutParams();
+            if (params == null) {
+                return;
+            }
             if (parentCanScroll()) {
-                params.gravity = Gravity.START | Gravity.CENTER;
+                this.tabGravity = Gravity.START | Gravity.CENTER;
+                params.gravity = this.tabGravity;
             } else {
                 params.gravity = tabGravity;
             }
+            setLayoutParams(params);
         } else {
-            params.gravity = tabGravity;
+            if (this.getLayoutParams() instanceof LinearLayout.LayoutParams) {
+                LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) this.getLayoutParams();
+                params.gravity = tabGravity;
+                setLayoutParams(params);
+            } else if (this.getLayoutParams() instanceof FrameLayout.LayoutParams) {
+                FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) this.getLayoutParams();
+                params.gravity = tabGravity;
+                setLayoutParams(params);
+            }
+
         }
-        setLayoutParams(params);
+
     }
 
     /**
@@ -958,6 +987,7 @@ public class YPXTabIndicator extends LinearLayout implements
         setTabColorChange(position, 1 - positionOffset);
         setTabColorChange(position + 1, positionOffset);
 
+
         mTransitX = (int) (tabWidth * positionOffset + transitX);
         mTabWidth = (int) (tabWidth + (tabLengthArray[position + 1] - tabWidth) * positionOffset);
         invalidate();
@@ -1010,7 +1040,7 @@ public class YPXTabIndicator extends LinearLayout implements
      *
      * @author yangpeixing
      */
-    interface DrawIndicatorCreator {
+   public interface DrawIndicatorCreator {
         /**
          * 默认为圆角矩形指示器，用户可继承重写自定义指示器样式
          *
@@ -1032,7 +1062,7 @@ public class YPXTabIndicator extends LinearLayout implements
      *
      * @author yangpeixing
      */
-    interface PageChangeListener {
+    public interface PageChangeListener {
         void onPageScrolled(int position, float positionOffset,
                             int positionOffsetPixels);
 
@@ -1046,7 +1076,7 @@ public class YPXTabIndicator extends LinearLayout implements
      *
      * @author yangpeixing
      */
-    interface TabClickListener {
+    public  interface TabClickListener {
         void onClick(TextView tab, int position);
     }
 

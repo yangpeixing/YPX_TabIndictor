@@ -45,11 +45,11 @@
             android:theme="@style/MyCheckBox" />
 
         <android.support.v7.widget.AppCompatCheckBox
-            android:id="@+id/cb_grivate"
+            android:id="@+id/cb_gravity"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="15dp"
-            android:checked="false"
+            android:checked="true"
             android:text="@string/tab_grivate"
             android:textColor="#333333"
             android:theme="@style/MyCheckBox" />
@@ -164,7 +164,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:progress="16" />
+            android:progress="0" />
 
         <TextView
             android:id="@+id/tv_holePadding"

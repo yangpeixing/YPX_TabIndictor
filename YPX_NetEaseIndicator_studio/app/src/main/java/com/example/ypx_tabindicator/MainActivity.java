@@ -21,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.nineoldandroids.view.ViewHelper;
+import com.ypx.tablayout.YPXTabLayout;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -35,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     private ViewPager mViewPager;
     private RelativeLayout rl_indicator;
     private String[] mDatas, allDatas;
-    private YPXTabIndicator indicator;
+    private YPXTabLayout indicator;
     private ImageView iv_add;
     private ImageButton ibt_add;
     private int style = 0;
@@ -55,11 +56,11 @@ public class MainActivity extends AppCompatActivity {
     private void initView() {
         allDatas = new String[]{"全局设置", "两字", "三个字", "四个字了", "五个字行么", "感谢您",
                 "使用本Demo", "学习", "该指示器控件", "如果你", "觉得", "效果很赞", "还请去", "Github上", "点个赞"};
-        mDatas = new String[]{allDatas[0], allDatas[1], allDatas[2]};
+        mDatas = allDatas;
         mViewPager = (ViewPager) findViewById(R.id.id_vp);
         rl_indicator = (RelativeLayout) findViewById(R.id.rl_indicator);
         hs_indicator = (HorizontalScrollView) findViewById(R.id.hs_indicator);
-        indicator = (YPXTabIndicator) findViewById(R.id.indicator);
+        indicator = (YPXTabLayout) findViewById(R.id.indicator);
         iv_add = (ImageView) findViewById(R.id.iv_add);
         grd_tabSetting = (GridLayout) findViewById(R.id.grd_tabSetting);
         v_mask = findViewById(R.id.v_mask);
@@ -123,7 +124,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             };
             mViewPager.setAdapter(mAdapter);
-            indicator.setViewPager(mViewPager, 0);
+            indicator.setViewPager(mViewPager, 10);
         } else {
             mAdapter.notifyDataSetChanged();
         }
@@ -157,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
         iv_add.setColorFilter(indicator.getTabTextColor());
     }
 
-    public YPXTabIndicator getIndicator() {
+    public YPXTabLayout getIndicator() {
         return indicator;
     }
 

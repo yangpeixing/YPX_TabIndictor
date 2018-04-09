@@ -1,4 +1,4 @@
-package com.example.ypx_tabindicator;
+package com.ypx.tablayout;
 
 import android.content.Context;
 import android.database.DataSetObserver;
