@@ -13,12 +13,12 @@ import android.util.AttributeSet;
  * @author yangpeixing
  *
  */
-public class UnderLineIndicator extends YPXTabLayout {
+public class UnderLineLayout extends YPXTabLayout {
 
 	/**
 	 * @param context
 	 */
-	public UnderLineIndicator(Context context) {
+	public UnderLineLayout(Context context) {
 		super(context);
 	}
 
@@ -26,7 +26,7 @@ public class UnderLineIndicator extends YPXTabLayout {
 	 * @param context
 	 * @param attrs
 	 */
-	public UnderLineIndicator(Context context, AttributeSet attrs) {
+	public UnderLineLayout(Context context, AttributeSet attrs) {
 		super(context, attrs);
 	}
 
@@ -35,8 +35,8 @@ public class UnderLineIndicator extends YPXTabLayout {
 	 * @param attrs
 	 * @param defStyleAttr
 	 */
-	public UnderLineIndicator(Context context, AttributeSet attrs,
-							  int defStyleAttr) {
+	public UnderLineLayout(Context context, AttributeSet attrs,
+						   int defStyleAttr) {
 		super(context, attrs, defStyleAttr);
 	}
 

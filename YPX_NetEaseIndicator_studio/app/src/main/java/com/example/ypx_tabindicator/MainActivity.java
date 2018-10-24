@@ -1,47 +1,35 @@
 package com.example.ypx_tabindicator;
 
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Spannable;
+import android.text.SpannableStringBuilder;
+import android.text.style.AbsoluteSizeSpan;
+import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
-import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
-import android.widget.GridLayout;
-import android.widget.HorizontalScrollView;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-import android.widget.Toast;
 
-import com.nineoldandroids.view.ViewHelper;
 import com.ypx.tablayout.YPXTabLayout;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    HorizontalScrollView hs_indicator;
     FragmentPagerAdapter mAdapter;
-    List<String> tabList;
-    List<String> selectList;
-    private List<SimpleFragment> mTabContents = new ArrayList<>();
+    private List<SimpleFragment2> mTabContents = new ArrayList<>();
     private ViewPager mViewPager;
-    private RelativeLayout rl_indicator;
     private String[] mDatas, allDatas;
-    private YPXTabLayout indicator;
-    private ImageView iv_add;
-    private ImageButton ibt_add;
-    private int style = 0;
-    private GridLayout grd_tabSetting;
-    private View v_mask;
+    private YPXTabLayout indicator, indicator2, indicator3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,54 +37,68 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         initView();
         initAdapter();
-        initListener();
-        setTabData();
     }
 
     private void initView() {
-        allDatas = new String[]{"全局设置", "两字", "三个字", "四个字了", "五个字行么", "感谢您",
-                "使用本Demo", "学习", "该指示器控件", "如果你", "觉得", "效果很赞", "还请去", "Github上", "点个赞"};
-        mDatas = allDatas;
+        allDatas = new String[]{"全部", "成交", "有效"};
+        mDatas = new String[]{"感谢您", "使用", "YPXTabLayout", "如果您", "觉得", "该指示器", "效果还行", "还请去", "我的GitHub", "点个赞"};
         mViewPager = (ViewPager) findViewById(R.id.id_vp);
-        rl_indicator = (RelativeLayout) findViewById(R.id.rl_indicator);
-        hs_indicator = (HorizontalScrollView) findViewById(R.id.hs_indicator);
         indicator = (YPXTabLayout) findViewById(R.id.indicator);
-        iv_add = (ImageView) findViewById(R.id.iv_add);
-        grd_tabSetting = (GridLayout) findViewById(R.id.grd_tabSetting);
-        v_mask = findViewById(R.id.v_mask);
-        ibt_add = (ImageButton) findViewById(R.id.ibt_add);
-    }
+        indicator2 = (YPXTabLayout) findViewById(R.id.indicator2);
+        indicator3 = (YPXTabLayout) findViewById(R.id.indicator3);
 
-    private void initListener() {
-        ibt_add.setOnClickListener(new View.OnClickListener() {
+
+        indicator.setTitles(allDatas);
+        indicator.setShowTabSizeChange(false);//关闭大小变换
+        indicator.setTabTextColor(Color.parseColor("#333333"));//设置未选控制时期中时颜色
+        indicator.setTabPressColor(Color.parseColor("#0078D5"));//设置选中后颜色
+        indicator.setTabLayoutGravity(Gravity.CENTER);//设置布局方式为居中
+        indicator.setTabWidth((ScreenUtils.getScreenWidth(this) - dp(50)) / 3);//设置tab的宽度
+        indicator.setIndicatorColor(Color.parseColor("#0078D5"));//设置指示器颜色
+        indicator.setTabTextSize(14);//设置字体默认大小
+        indicator.setTabMaxTextSize(16);//设置字体默认大小
+        //设置下划线
+        indicator.setDrawIndicatorCreator(new YPXTabLayout.DrawIndicatorCreator() {
             @Override
-            public void onClick(View v) {
-                if (grd_tabSetting.getVisibility() == View.VISIBLE) {
-                    grd_tabSetting.setVisibility(View.GONE);
-                    v_mask.setVisibility(View.GONE);
-                    grd_tabSetting.setAnimation(AnimationUtils.loadAnimation(MainActivity.this, R.anim.dd_menu_out));
-                    ViewHelper.setRotation(iv_add, 0);
-                } else {
-                    v_mask.setVisibility(View.VISIBLE);
-                    grd_tabSetting.setVisibility(View.VISIBLE);
-                    grd_tabSetting.setAnimation(AnimationUtils.loadAnimation(MainActivity.this, R.anim.dd_menu_in));
-                    ViewHelper.setRotation(iv_add, 180);
-                }
+            public void drawIndicator(Canvas canvas, int left, int top, int right, int bottom, Paint paint, int raduis) {
+                float offset = indicator.getPositionOffset();
+                float x = 4 * offset * (1 - offset);
+
+//                int xleft = left;
+//                int xright = right;
+                RectF oval = new RectF(left + dp(30), bottom - dp(3), right - dp(30), bottom);
+                canvas.drawRect(oval, paint);
+
+//                Log.e("drawIndicator", "getPositionOffset: " + offset + "   x=" + x + "   left="
+//                        + left + "   totalLeft=" + (left - indicator.getTabWidth() * x));
+
+//                RectF oval2 = new RectF(bottom / 2    + left, top+dp(5), right - bottom / 2, bottom-dp(5));
+//                canvas.drawCircle(oval2.left, bottom / 2, (bottom -dp(10))/ 2, paint);
+//                canvas.drawRect(oval2, paint);
+//                canvas.drawCircle(oval2.right, bottom / 2, (bottom -dp(10))/ 2, paint);
             }
         });
 
-        v_mask.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ibt_add.performClick();
-            }
-        });
+        int[] numbs = new int[]{16, 9, 6};
+        for (int i = 0; i < numbs.length; i++) {
+            String text = allDatas[i] + " " + numbs[i];
+            SpannableStringBuilder builder = new SpannableStringBuilder(text);
+            int start = text.indexOf(numbs[i] + "");
+            builder.setSpan(new ForegroundColorSpan(Color.parseColor("#F98474")), start,
+                    start + (numbs[i] + "").length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            builder.setSpan(new AbsoluteSizeSpan(ScreenUtils.sp2px(this, 14)), start,
+                    start + (numbs[i] + "").length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+            indicator.getTab(i).setText(builder);
+        }
+
+
+        indicator2.setTitles(mDatas);
     }
 
     private void initAdapter() {
         mTabContents.clear();
         for (String data : mDatas) {
-            mTabContents.add(SimpleFragment.newInstance(data));
+            mTabContents.add(SimpleFragment2.newInstance(data));
         }
         if (mAdapter == null) {
             mAdapter = new FragmentPagerAdapter(getSupportFragmentManager()) {
@@ -117,115 +119,67 @@ public class MainActivity extends AppCompatActivity {
 
                 @Override
                 public Object instantiateItem(ViewGroup container, int position) {
-                    SimpleFragment fragment = (SimpleFragment) super.instantiateItem(container, position);
+                    SimpleFragment2 fragment = (SimpleFragment2) super.instantiateItem(container, position);
                     fragment.refreshData(mDatas[position]);
                     return fragment;
 
                 }
             };
             mViewPager.setAdapter(mAdapter);
-            indicator.setViewPager(mViewPager, 10);
         } else {
             mAdapter.notifyDataSetChanged();
         }
-        indicator.setTitles(mDatas);
+
+        indicator.setViewPager(mViewPager, 0);
+        indicator2.setViewPager(mViewPager, 0);
+        indicator3.setViewPager(mViewPager, 0);
+
+        indicator2.setOnPageChangeListener(new YPXTabLayout.PageChangeListener() {
+
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                Log.e("onPageSelected", "onPageScrolled: " + position + "  " + positionOffset);
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                Log.e("onPageSelected", "onPageSelected: " + position);
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+                Log.e("onPageSelected", "onPageScrollStateChanged: " + state);
+
+            }
+        });
+
+//        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+//            @Override
+//            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+//                indicator.onPageScrolled(position, positionOffset, positionOffsetPixels);
+//                indicator2.onPageScrolled(position, positionOffset, positionOffsetPixels);
+//                indicator3.onPageScrolled(position, positionOffset, positionOffsetPixels);
+//            }
+//
+//            @Override
+//            public void onPageSelected(int position) {
+//                indicator.onPageSelected(position);
+//                indicator2.onPageSelected(position);
+//                indicator3.onPageSelected(position);
+//            }
+//
+//            @Override
+//            public void onPageScrollStateChanged(int state) {
+//                indicator.onPageScrollStateChanged(state);
+//                indicator2.onPageScrollStateChanged(state);
+//                indicator3.onPageScrollStateChanged(state);
+//            }
+//        });
     }
 
-    public void setHs_indicatorHeight(int height) {
-        ViewGroup.LayoutParams params = hs_indicator.getLayoutParams();
-        params.height = height;
-        hs_indicator.setLayoutParams(params);
-    }
-
-    public void setmDatas(String[] mDatas) {
-        this.mDatas = mDatas;
-        initAdapter();
-    }
-
-
-    public void hideTabSettingIcon(boolean isHide) {
-        if (isHide) {
-            iv_add.setVisibility(View.GONE);
-            ibt_add.setVisibility(View.GONE);
-        } else {
-            iv_add.setVisibility(View.VISIBLE);
-            ibt_add.setVisibility(View.VISIBLE);
-        }
-    }
-
-    public void setTabBackgroundColor(int color) {
-        rl_indicator.setBackgroundColor(color);
-        iv_add.setColorFilter(indicator.getTabTextColor());
-    }
 
     public YPXTabLayout getIndicator() {
         return indicator;
-    }
-
-    public int getStyle() {
-        return style;
-    }
-
-    public void setStyle(int style) {
-        this.style = style;
-    }
-
-    private void setTabData() {
-        tabList = new ArrayList<>();
-        selectList = new ArrayList<>();
-        selectList.add(mDatas[0]);
-        selectList.add(mDatas[1]);
-        selectList.add(mDatas[2]);
-        Collections.addAll(tabList, allDatas);
-        for (final String s : tabList) {
-            final TextView textView = new TextView(this);
-            textView.setText(s);
-            textView.setPadding(dp(10), dp(10), dp(10), dp(10));
-            textView.setCompoundDrawablePadding(dp(3));
-            textView.setGravity(Gravity.CENTER);
-            if (s.length() > 6) {
-                textView.setTextSize(10);
-            } else if (s.length() > 4) {
-                textView.setTextSize(12);
-            } else {
-                textView.setTextSize(14);
-            }
-            if (selectList.contains(s)) {
-                textView.setSelected(true);
-                textView.setBackground(getResources().getDrawable(R.drawable.a_border_gray_line2));
-                textView.setTextColor(Color.RED);
-            } else {
-                textView.setSelected(false);
-                textView.setTextColor(Color.parseColor("#666666"));
-                textView.setBackground(getResources().getDrawable(R.drawable.a_border_gray_line));
-            }
-
-            textView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (s.equals(mDatas[0])) {
-                        Toast.makeText(MainActivity.this, "该Tab不可操作!", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-                    if (textView.isSelected()) {
-                        textView.setTextColor(Color.parseColor("#666666"));
-                        textView.setBackground(getResources().getDrawable(R.drawable.a_border_gray_line));
-                        selectList.remove(s);
-                    } else {
-                        textView.setBackground(getResources().getDrawable(R.drawable.a_border_gray_line2));
-                        textView.setTextColor(Color.RED);
-                        selectList.add(s);
-                    }
-                    textView.setSelected(!textView.isSelected());
-                    setmDatas(selectList.toArray(new String[selectList.size()]));
-                }
-            });
-            ViewGroup.MarginLayoutParams params = new ViewGroup.MarginLayoutParams((ScreenUtils.getScreenWidth(this) - dp(50)) / 3, dp(40));
-            params.bottomMargin = dp(10);
-            params.rightMargin = dp(10);
-            textView.setLayoutParams(params);
-            grd_tabSetting.addView(textView);
-        }
     }
 
     public int dp(int dp) {

@@ -36,7 +36,7 @@ public class SimpleFragment extends Fragment implements View.OnClickListener, Co
     LinearLayout ll_tabWidth;
     int normalSize = 14;
     YPXTabLayout indicator;
-    MainActivity mainActivity;
+    SimpleActivity mainActivity;
     private String mTitle = "title";
 
     public static SimpleFragment newInstance(String title) {
@@ -54,7 +54,7 @@ public class SimpleFragment extends Fragment implements View.OnClickListener, Co
         if (arguments != null) {
             mTitle = arguments.getString(BUNDLE_TITLE);
         }
-        mainActivity = (MainActivity) getActivity();
+        mainActivity = (SimpleActivity) getActivity();
     }
 
     @Override
@@ -107,7 +107,7 @@ public class SimpleFragment extends Fragment implements View.OnClickListener, Co
         int pressSize = indicator.getMaxTabTextSize();
         sb_normal.setProgress((normalSize - 10) * 10);
         sb_press.setProgress((pressSize - normalSize) * 10);
-        
+
         cb_isShowIndicator.setChecked(indicator.isShowIndicator());
         ((ImageView) ll_tabNormalColor.getChildAt(0)).setColorFilter(indicator.getTabTextColor());
         ((ImageView) ll_tabPressColor.getChildAt(0)).setColorFilter(indicator.getTabPressColor());
